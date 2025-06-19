@@ -1,0 +1,31 @@
+{
+  "name": "sow-generator",
+  "version": "1.0.0",
+  "description": "Professional Statement of Work Generator with AI integration",
+  "main": "sow-generator-new.html",
+  "scripts": {
+    "start": "nginx -g 'daemon off;'",
+    "dev": "python -m http.server 8000",
+    "build": "echo 'No build step required for static files'",
+    "test": "echo 'No tests specified'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bashhh89/sawfront.git"
+  },
+  "keywords": [
+    "sow",
+    "statement-of-work",
+    "pdf-generation",
+    "business-documents",
+    "ai-integration"
+  ],
+  "author": "Social Garden",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bashhh89/sawfront/issues"
+  },
+  "homepage": "https://github.com/bashhh89/sawfront#readme",
+  "dependencies": {},
+  "devDependencies": {}
+}

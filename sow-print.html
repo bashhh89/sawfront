@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SOW Export</title>
+
+  <!-- Inter Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- TailwindCSS - Development version for prototyping -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Suppress Tailwind CSS production warning for this prototype
+    tailwind.config = {
+      theme: {
+        extend: {}
+      }
+    }
+  </script>
+
+  <!-- Paged.js -->
+  <script src="https://unpkg.com/pagedjs/dist/paged.polyfill.js"></script>
+
+  <style>
+    @page {
+      size: A4;
+      margin: 2.5cm;
+      @bottom-center {
+        content: "Page " counter(page);
+        font-family: 'Inter';
+        font-size: 12px;
+        color: #999;
+      }
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .section-start {
+      break-before: page;
+    }
+    
+    @media print {
+      .no-print {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body class="bg-white text-gray-800 px-10 py-16 max-w-[800px] mx-auto">
+  
+  <!-- Print Controls - Only visible on screen -->
+  <div class="no-print fixed top-0 right-0 m-4 flex space-x-2 z-50">
+    <button id="print-btn" class="bg-blue-600 text-white font-semibold px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 shadow-sm">
+      Print
+    </button>
+    <button id="download-pdf-btn" class="bg-green-600 text-white font-semibold px-4 py-2 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200 shadow-sm">
+      Download PDF
+    </button>
+    <button onclick="window.close()" class="bg-gray-600 text-white font-semibold px-4 py-2 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200 shadow-sm">
+      Close
+    </button>
+  </div>
+
+  <div id="print-container">
+    <h1 class="text-2xl font-bold text-[#10373a] mb-4">Statement of Work</h1>
+    <p id="generated-for" class="mb-6">Generated for Social Garden — <span id="generated-date"></span></p>
+
+    <h2 class="text-xl font-semibold text-[#4f46e5] mt-12 mb-4">Project Overview</h2>
+    <p id="project-overview">This scope of work outlines...</p>
+
+    <h2 class="text-xl font-semibold text-[#4f46e5] mt-12 mb-4">Project Objectives</h2>
+    <ul id="objectives-list" class="list-disc pl-6 mb-6">
+      <!-- Objectives will be populated here -->
+    </ul>
+
+    <h2 class="text-xl font-semibold text-[#4f46e5] mt-12 mb-4">Key Deliverables</h2>
+    <ul id="deliverables-list" class="list-disc pl-6 mb-6">
+      <!-- Deliverables will be populated here -->
+    </ul>
+
+    <h2 class="text-xl font-semibold text-[#4f46e5] mt-12 mb-4">Project Scope</h2>
+    <ul id="scope-list" class="list-disc pl-6 mb-6">
+      <!-- Scope items will be populated here -->
+    </ul>
+
+    <h2 class="text-xl font-semibold text-[#4f46e5] mt-12 mb-4">Project Timeline</h2>
+    <p id="project-timeline">The timeline for this project will be...</p>
+
+    <div class="section-start"></div>
+
+    <h2 class="text-xl font-semibold text-[#4f46e5] mt-12 mb-4">Investment Summary</h2>
+    <table class="table-auto w-full text-right border border-collapse border-gray-300">
+      <thead class="bg-gray-100 text-left">
+        <tr>
+          <th class="p-2 text-gray-700 font-medium">Role</th>
+          <th class="p-2 text-gray-700 font-medium">Hours</th>
+          <th class="p-2 text-gray-700 font-medium">Rate</th>
+          <th class="p-2 text-gray-700 font-medium">Total</th>
+        </tr>
+      </thead>
+      <tbody id="pricing-table-body">
+        <!-- Pricing rows will be populated here -->
+      </tbody>
+      <tfoot class="bg-gray-100">
+        <tr>
+          <td colspan="3" class="p-2 text-right font-semibold">Total</td>
+          <td id="total-amount" class="p-2 font-semibold">$0.00</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('Print page loaded, checking for SOW data...');
+      
+      // Load data from localStorage
+      const sowDataString = localStorage.getItem('sow_data');
+      console.log('Raw localStorage data:', sowDataString);
+      
+      const sowData = JSON.parse(sowDataString || '{}');
+      console.log('Parsed SOW data:', sowData);
+      
+      if (Object.keys(sowData).length === 0) {
+        console.error('No SOW data found in localStorage');
+        document.body.innerHTML = '<div class="text-center mt-20"><h1 class="text-2xl text-red-600">Error: No SOW data found</h1><p class="mt-4">Please generate a SOW from the main application first, then click "Print Version".</p><p class="mt-2 text-sm text-gray-600">Debug: localStorage key "sow_data" is empty or missing.</p></div>';
+        return;
+      }
+        // Update document title
+      document.title = `SOW - ${sowData.clientName}`;
+        // Populate basic information with null checks
+      const generatedForElement = document.getElementById('generated-for');
+      const generatedDateElement = document.getElementById('generated-date');
+      const projectOverviewElement = document.getElementById('project-overview');
+      const projectTimelineElement = document.getElementById('project-timeline');
+      
+      // Add debugging
+      console.log('Client name:', sowData.clientName);
+      console.log('Generated date:', sowData.generatedDate);
+      console.log('Elements found:', {
+        generatedForElement: !!generatedForElement,
+        generatedDateElement: !!generatedDateElement,
+        projectOverviewElement: !!projectOverviewElement,
+        projectTimelineElement: !!projectTimelineElement
+      });
+      
+      if (generatedForElement) {
+        const clientName = sowData.clientName || 'Unknown Client';
+        const generatedDate = sowData.generatedDate || new Date().toLocaleDateString();
+        generatedForElement.textContent = `Generated for ${clientName} — ${generatedDate}`;
+      }
+      
+      if (generatedDateElement) {
+        generatedDateElement.textContent = sowData.generatedDate || new Date().toLocaleDateString();
+      }
+      
+      if (projectOverviewElement) {
+        projectOverviewElement.textContent = sowData.overview || 'Project overview to be determined.';
+      }
+      
+      if (projectTimelineElement) {
+        projectTimelineElement.textContent = sowData.timeline || 'Project timeline to be determined.';
+      }
+      
+      // Populate lists
+      populateList('objectives-list', sowData.objectives);
+      populateList('deliverables-list', sowData.deliverables);
+      populateList('scope-list', sowData.scopeItems);
+        // Populate pricing table
+      const pricingTableBody = document.getElementById('pricing-table-body');
+      const totalAmountElement = document.getElementById('total-amount');
+      
+      if (pricingTableBody && sowData.pricingRows && sowData.pricingRows.length > 0) {
+        pricingTableBody.innerHTML = '';
+          sowData.pricingRows.forEach(row => {
+          try {
+            const tr = document.createElement('tr');
+            const roleName = row.roleName || 'Role';
+            const hours = row.hours || 0;
+            const rate = row.rate || 0;
+            const rowTotal = row.rowTotal || 0;
+            
+            tr.innerHTML = `
+              <td class="p-2 border-t">${roleName}</td>
+              <td class="p-2 border-t">${hours}</td>
+              <td class="p-2 border-t">$${rate}</td>
+              <td class="p-2 border-t font-semibold">$${formatCurrency(rowTotal)}</td>
+            `;
+            pricingTableBody.appendChild(tr);
+          } catch (error) {
+            console.error('Error creating pricing row:', error, row);
+          }
+        });
+      } else if (pricingTableBody) {
+        pricingTableBody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-500">No pricing data available</td></tr>';
+      }
+        // Update total amount
+      if (totalAmountElement) {
+        try {
+          const totalValue = sowData.total || 0;
+          totalAmountElement.textContent = `$${formatCurrency(totalValue)}`;
+        } catch (error) {
+          console.error('Error setting total amount:', error);
+          totalAmountElement.textContent = '$0.00';
+        }
+      }
+        // Set up print button
+      const printBtn = document.getElementById('print-btn');
+      const downloadPdfBtn = document.getElementById('download-pdf-btn');
+      
+      if (printBtn) {
+        printBtn.addEventListener('click', function() {
+          window.print();
+        });
+      }
+      
+      // Set up download PDF button
+      if (downloadPdfBtn) {
+        downloadPdfBtn.addEventListener('click', async function() {
+          this.textContent = 'Preparing PDF...';
+          this.disabled = true;
+          
+          try {
+            // We'll use the browser's print functionality to save as PDF
+            window.print();
+          } finally {
+            this.textContent = 'Download PDF';
+            this.disabled = false;
+          }
+        });
+      }
+      
+      console.log('Print page setup completed successfully');
+    });
+      function populateList(elementId, items) {
+      const list = document.getElementById(elementId);
+      
+      if (!list) {
+        console.warn(`Element with ID '${elementId}' not found`);
+        return;
+      }
+      
+      list.innerHTML = '';
+      
+      if (!items || items.length === 0) {
+        const li = document.createElement('li');
+        li.textContent = 'To be determined';
+        list.appendChild(li);
+        return;
+      }
+      
+      items.forEach(item => {
+        if (item && item.trim()) {
+          const li = document.createElement('li');
+          li.textContent = item;
+          list.appendChild(li);
+        }
+      });
+    }
+      function formatCurrency(value) {
+      try {
+        if (value === null || value === undefined || value === '') {
+          return '0.00';
+        }
+        const numValue = parseFloat(value);
+        if (isNaN(numValue)) {
+          return '0.00';
+        }
+        return numValue.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      } catch (error) {
+        console.error('Error formatting currency:', error, value);
+        return '0.00';
+      }
+    }
+  </script>
+</body>
+</html>
