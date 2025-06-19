@@ -1590,9 +1590,7 @@
                     li.style.marginBottom = '2mm';
                     objectivesList.appendChild(li);
                 }
-            });
-
-            // Update deliverables - CLIENT READY (no UI controls)
+            });            // Update deliverables - CLIENT READY (no UI controls)
             const deliverables = getListItems('deliverables-container');
             const deliverablesList = document.getElementById('pdf-deliverables');
             deliverablesList.innerHTML = '';
@@ -1605,9 +1603,9 @@
                 }
             });
 
-            // Update scope - CLIENT READY (no UI controls)
+            // Update scope items
             const scopeItems = getListItems('scope-container');
-            const scopeList = document.getElementById('pdf-scope');
+            const scopeList = document.getElementById('pdf-scope-items');
             scopeList.innerHTML = '';
             scopeItems.forEach(scope => {
                 if (scope.trim()) {
@@ -1616,7 +1614,7 @@
                     li.style.marginBottom = '2mm';
                     scopeList.appendChild(li);
                 }
-            });            // Update timeline
+            });// Update timeline
             const timeline = document.getElementById('project-timeline').value;
             document.getElementById('pdf-timeline').textContent = timeline;
 
