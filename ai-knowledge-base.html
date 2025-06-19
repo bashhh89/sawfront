@@ -1,0 +1,2597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Garden - AI Knowledge Base</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">    <style>
+        :root {
+            --primary-color: #10373a;
+            --primary-light: #1a5a5f;
+            --primary-dark: #0a2326;
+            --accent-color: #34d399;
+            --accent-light: #6ee7b7;
+            --background-gradient: linear-gradient(135deg, #10373a 0%, #1a5a5f 100%);
+        }
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+        }
+        
+        /* Enhanced Visual Components */
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .primary-gradient {
+            background: var(--background-gradient);
+        }
+        
+        .primary-gradient-light {
+            background: linear-gradient(135deg, #1a5a5f 0%, #2dd4bf 100%);
+        }
+        
+        .card-elevated {
+            box-shadow: 0 10px 25px rgba(16, 55, 58, 0.1);
+            border: 1px solid rgba(16, 55, 58, 0.05);
+        }
+        
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(16, 55, 58, 0.15);
+        }
+        
+        /* Knowledge Base Visual Styles */
+        .service-node {
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid #e5e7eb;
+            background: rgba(255, 255, 255, 0.98);
+        }
+        
+        .service-node:hover {
+            transform: translateY(-4px) scale(1.02);
+            border-color: var(--primary-color);
+            box-shadow: 0 15px 35px rgba(16, 55, 58, 0.2);
+        }
+        
+        .service-connection {
+            stroke: #e5e7eb;
+            stroke-width: 2;
+            opacity: 0.6;
+        }
+        
+        .service-connection.highlighted {
+            stroke: var(--primary-color);
+            stroke-width: 3;
+            opacity: 1;
+        }
+        
+        /* Enhanced Service Category Colors */
+        .category-marketing { 
+            border-left: 4px solid var(--primary-color); 
+            background: linear-gradient(135deg, rgba(16, 55, 58, 0.05) 0%, rgba(52, 211, 153, 0.05) 100%);
+        }
+        .category-audit { 
+            border-left: 4px solid #f59e0b; 
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(251, 191, 36, 0.05) 100%);
+        }
+        .category-strategy { 
+            border-left: 4px solid #8b5cf6; 
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%);
+        }
+        .category-managed { 
+            border-left: 4px solid #06b6d4; 
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.05) 0%, rgba(34, 211, 238, 0.05) 100%);
+        }
+        .category-advisory { 
+            border-left: 4px solid #ef4444; 
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, rgba(248, 113, 113, 0.05) 100%);
+        }
+        .category-configuration { 
+            border-left: 4px solid #84cc16; 
+            background: linear-gradient(135deg, rgba(132, 204, 22, 0.05) 0%, rgba(163, 230, 53, 0.05) 100%);
+        }
+        .category-implementation { 
+            border-left: 4px solid #f97316; 
+            background: linear-gradient(135deg, rgba(249, 115, 22, 0.05) 0%, rgba(251, 146, 60, 0.05) 100%);
+        }
+        .category-project { 
+            border-left: 4px solid #ec4899; 
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.05) 0%, rgba(244, 114, 182, 0.05) 100%);
+        }
+        .category-bundles { 
+            border-left: 4px solid #6366f1; 
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(129, 140, 248, 0.05) 100%);
+        }
+        .category-custom { 
+            border-left: 4px solid #14b8a6; 
+            background: linear-gradient(135deg, rgba(20, 184, 166, 0.05) 0%, rgba(45, 212, 191, 0.05) 100%);
+        }
+        
+        /* Enhanced Chat Interface */
+        .user-message {
+            background: var(--background-gradient);
+            color: white;
+            margin-left: 20%;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 15px rgba(16, 55, 58, 0.3);
+        }
+        
+        .ai-message {
+            background: rgba(255, 255, 255, 0.95);
+            color: #374151;
+            margin-right: 20%;
+            margin-bottom: 12px;
+            border: 1px solid rgba(16, 55, 58, 0.1);
+            box-shadow: 0 2px 10px rgba(16, 55, 58, 0.08);
+        }
+        
+        .chat-message {
+            border-radius: 20px;
+            padding: 16px 20px;
+            max-width: 80%;
+            word-wrap: break-word;
+            line-height: 1.6;
+            animation: slideInMessage 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        @keyframes slideInMessage {
+            from { opacity: 0; transform: translateY(20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        
+        /* Enhanced Button Styles */
+        .btn-primary {
+            background: var(--background-gradient);
+            color: white;
+            border: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(16, 55, 58, 0.2);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 55, 58, 0.3);
+            background: linear-gradient(135deg, #1a5a5f 0%, #10373a 100%);
+        }
+        
+        .btn-secondary {
+            background: rgba(16, 55, 58, 0.1);
+            color: var(--primary-color);
+            border: 1px solid rgba(16, 55, 58, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(16, 55, 58, 0.15);
+            transform: translateY(-1px);
+        }
+        
+        /* Enhanced Modal Styles */
+        .modal-overlay {
+            background: rgba(16, 55, 58, 0.7);
+            backdrop-filter: blur(8px);
+        }
+        
+        .modal-content {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 25px 50px rgba(16, 55, 58, 0.3);
+        }
+        
+        /* Form Enhancement */
+        .form-input {
+            border: 2px solid rgba(16, 55, 58, 0.1);
+            background: rgba(255, 255, 255, 0.95);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .form-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(16, 55, 58, 0.1);
+            background: white;
+        }
+        
+        /* Tab Enhancement */
+        .tab-active {
+            background: var(--background-gradient);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 55, 58, 0.2);
+        }
+        
+        .tab-inactive {
+            background: rgba(16, 55, 58, 0.05);
+            color: var(--primary-color);
+            border: 1px solid rgba(16, 55, 58, 0.1);
+        }
+        
+        .tab-inactive:hover {
+            background: rgba(16, 55, 58, 0.1);
+        }
+        }
+        
+        /* Loading indicators */
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            background: #f3f4f6;
+            border-radius: 16px;
+            margin-right: 20%;
+            width: fit-content;
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #9ca3af;
+            margin: 0 2px;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+        
+        /* Client Profile Cards */
+        .client-card {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .client-card:hover {
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .client-status-cold { border-left: 4px solid #ef4444; }
+        .client-status-warm { border-left: 4px solid #f59e0b; }
+        .client-status-hot { border-left: 4px solid #10b981; }
+        
+        /* Tab Navigation */
+        .tab-active {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+        }
+        
+        .tab-inactive {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+        
+        /* Service Innovation Suggestions */
+        .innovation-card {
+            border: 2px dashed #e5e7eb;
+            transition: all 0.3s ease;
+        }
+        
+        .innovation-card:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+        
+        .add-to-kb-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .add-to-kb-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->    <header class="primary-gradient shadow-lg border-b border-opacity-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <img src="Logo Dark-Green.png" alt="Social Garden" class="h-8 w-auto mr-3 filter brightness-0 invert">
+                    <h1 class="text-xl font-bold text-white">AI Knowledge Base</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-green-200">Connected</span>
+                    <div class="w-3 h-3 bg-green-400 rounded-full animate-pulse shadow-sm"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Tab Navigation -->
+        <div class="mb-8">
+            <nav class="flex space-x-4">
+                <button id="tab-knowledge" class="tab-active px-6 py-3 rounded-lg font-medium transition-all">
+                    📚 Knowledge Repository
+                </button>
+                <button id="tab-clients" class="tab-inactive px-6 py-3 rounded-lg font-medium transition-all">
+                    👥 Client Profiles
+                </button>
+                <button id="tab-sow" class="tab-inactive px-6 py-3 rounded-lg font-medium transition-all">
+                    📄 SOW Generator
+                </button>
+                <button id="tab-innovation" class="tab-inactive px-6 py-3 rounded-lg font-medium transition-all">
+                    💡 Service Innovation
+                </button>
+            </nav>
+        </div>        <!-- Knowledge Repository Tab -->
+        <div id="content-knowledge" class="tab-content">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Visual Knowledge Map -->
+                <div class="lg:col-span-2">
+                    <div class="glass-effect rounded-xl shadow-lg card-elevated p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-xl font-bold text-gray-900 flex items-center">
+                                <span class="w-8 h-8 primary-gradient rounded-lg flex items-center justify-center mr-3">
+                                    🗺️
+                                </span>
+                                Service Map
+                            </h2>
+                            <div class="flex space-x-2">
+                                <button id="view-tree" class="btn-primary px-4 py-2 rounded-lg text-sm font-medium">🌳 Tree View</button>
+                                <button id="view-network" class="btn-secondary px-4 py-2 rounded-lg text-sm font-medium">🕸️ Network View</button>
+                                <button id="view-categories" class="btn-secondary px-4 py-2 rounded-lg text-sm font-medium">📂 Categories</button>
+                            </div>
+                        </div>
+                        <div id="knowledge-visualization" class="w-full h-96 border-2 border-dashed border-gray-200 rounded-xl bg-gradient-to-br from-gray-50 to-white"></div>
+                        
+                        <!-- Service Details Panel -->
+                        <div id="service-details" class="mt-6 hidden">
+                            <h3 id="service-title" class="text-lg font-semibold mb-2"></h3>
+                            <div id="service-info" class="space-y-2 text-sm text-gray-600"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Chat Interface -->
+                <div class="lg:col-span-1">
+                    <div class="glass-effect rounded-xl shadow-lg card-elevated p-6">
+                        <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                            <span class="w-8 h-8 primary-gradient rounded-lg flex items-center justify-center mr-3">
+                                🤖
+                            </span>
+                            AI Assistant
+                        </h2>                        
+                        <!-- Chat Messages -->
+                        <div id="chat-messages" class="h-80 overflow-y-auto mb-6 space-y-3 p-4 bg-gradient-to-b from-gray-50 to-white rounded-xl border border-gray-100">
+                            <div class="ai-message chat-message">
+                                <p><strong>Hello!</strong> I'm your AI assistant for the Knowledge Base. Ask me anything about your services, pricing, or how to improve them! 🚀</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Chat Input -->
+                        <div class="flex space-x-3">                            <input 
+                                type="text" 
+                                id="chat-input" 
+                                placeholder="Ask about services, pricing, improvements..."
+                                class="form-input flex-1 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-opacity-50"
+                            >
+                            <button 
+                                id="send-chat" 
+                                class="btn-primary px-6 py-3 rounded-xl hover:scale-105 transition-transform font-medium"
+                            >
+                                <span class="hidden sm:inline">Send</span>
+                                <span class="sm:hidden">📤</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Quick Questions -->
+                        <div class="mt-6">
+                            <p class="text-xs text-gray-500 mb-3 font-medium">💡 Quick questions:</p>
+                            <div class="space-y-2">
+                                <button class="quick-question w-full text-left text-xs p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg hover:from-gray-100 hover:to-gray-200 transition-all border border-gray-200 hover:border-gray-300">
+                                    What's the average pricing for Marketing Automation services?
+                                </button>
+                                <button class="quick-question w-full text-left text-xs p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg hover:from-gray-100 hover:to-gray-200 transition-all border border-gray-200 hover:border-gray-300">
+                                    How can AI enhance our current service offerings?
+                                </button>
+                                <button class="quick-question w-full text-left text-xs p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg hover:from-gray-100 hover:to-gray-200 transition-all border border-gray-200 hover:border-gray-300">
+                                    What services work best together for enterprise clients?
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>        <!-- Client Profiles Tab -->
+        <div id="content-clients" class="tab-content hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Client Management -->
+                <div class="lg:col-span-2">
+                    <div class="glass-effect rounded-xl shadow-lg card-elevated p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-xl font-bold text-gray-900 flex items-center">
+                                <span class="w-8 h-8 primary-gradient rounded-lg flex items-center justify-center mr-3">
+                                    👥
+                                </span>
+                                Client Profiles
+                            </h2>
+                            <button id="add-client" class="btn-primary px-6 py-3 rounded-xl hover:scale-105 transition-transform font-medium">
+                                <span class="mr-2">+</span> Add Client
+                            </button>
+                        </div>
+                        
+                        <!-- Search and Filter -->
+                        <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input 
+                                type="text" 
+                                id="client-search" 
+                                placeholder="🔍 Search clients..."
+                                class="form-input px-4 py-3 rounded-xl"
+                            >
+                            <select id="status-filter" class="form-input px-4 py-3 rounded-xl">
+                                <option value="">📊 All Statuses</option>
+                                <option value="cold">❄️ Cold Lead</option>
+                                <option value="warm">🌡️ Warm Lead</option>
+                                <option value="hot">🔥 Hot Lead</option>
+                                <option value="client">✅ Active Client</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Client Cards -->
+                        <div id="client-list" class="space-y-4">
+                            <!-- Client cards will be populated here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Client Analysis -->
+                <div class="lg:col-span-1">
+                    <div class="glass-effect rounded-xl shadow-lg card-elevated p-6">
+                        <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                            <span class="w-8 h-8 primary-gradient rounded-lg flex items-center justify-center mr-3">
+                                📊
+                            </span>
+                            Client Analysis
+                        </h2>
+                        <div id="client-analysis" class="text-center text-gray-500 py-8 bg-gradient-to-br from-gray-50 to-white rounded-xl border-2 border-dashed border-gray-200">
+                            <div class="w-16 h-16 primary-gradient rounded-full flex items-center justify-center mx-auto mb-4 opacity-50">
+                                <span class="text-2xl text-white">🤖</span>
+                            </div>
+                            <p class="font-medium">Select a client to see AI-powered analysis</p>
+                            <p class="text-sm mt-2">Personalized insights & service recommendations</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SOW Generator Tab -->
+        <div id="content-sow" class="tab-content hidden">
+            <div class="bg-white rounded-lg shadow-sm border p-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-6">🚀 AI-Powered SOW Generator</h2>
+                <div class="text-center py-12">
+                    <p class="text-lg text-gray-600 mb-4">Enhanced SOW Generator with AI Knowledge Base Integration</p>
+                    <button onclick="window.open('enhanced-sow-demo.html', '_blank')" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        Open Enhanced SOW Generator
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Service Innovation Tab -->
+        <div id="content-innovation" class="tab-content hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Innovation Suggestions -->
+                <div class="bg-white rounded-lg shadow-sm border p-6">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4">💡 AI Enhancement Suggestions</h2>
+                    <div id="innovation-suggestions" class="space-y-4">
+                        <!-- Innovation cards will be populated here -->
+                    </div>
+                    <button id="generate-innovations" class="w-full mt-6 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                        Generate New AI Enhancement Ideas
+                    </button>
+                </div>
+                
+                <!-- Service Evolution -->
+                <div class="bg-white rounded-lg shadow-sm border p-6">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4">📈 Service Evolution</h2>
+                    <div id="service-evolution" class="space-y-4">
+                        <p class="text-gray-600">Track how your services evolve with AI suggestions</p>
+                        <!-- Evolution timeline will be shown here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>    <!-- Add Client Modal -->
+    <div id="add-client-modal" class="fixed inset-0 modal-overlay hidden items-center justify-center z-50 p-2">
+        <div class="modal-content rounded-xl w-full max-w-3xl max-h-[95vh] overflow-hidden">
+            <!-- Modal Header -->
+            <div class="primary-gradient px-4 py-3 text-white">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-6 h-6 bg-white bg-opacity-20 rounded flex items-center justify-center">
+                            <span class="text-sm">🚀</span>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold">Create New Client Profile</h3>
+                            <p class="text-green-200 text-xs">AI-powered workspace & document analysis included</p>
+                        </div>
+                    </div>
+                    <button type="button" id="cancel-add-client" class="w-6 h-6 bg-white bg-opacity-20 rounded flex items-center justify-center hover:bg-opacity-30 transition-all">
+                        <span class="text-sm">✕</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Modal Content -->
+            <div class="p-3 overflow-y-auto max-h-[calc(95vh-100px)]">                <form id="add-client-form" class="space-y-3">
+                    <!-- Section 1: Basic Information -->
+                    <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-3">
+                        <h4 class="font-medium text-gray-900 mb-2 flex items-center text-sm">
+                            <span class="w-4 h-4 primary-gradient rounded flex items-center justify-center mr-2 text-white text-xs">👤</span>
+                            Basic Information
+                        </h4>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Client Name *</label>
+                                <input type="text" id="new-client-name" class="form-input w-full px-2 py-1.5 rounded text-sm" required placeholder="John Smith">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Company</label>
+                                <input type="text" id="new-client-company" class="form-input w-full px-2 py-1.5 rounded text-sm" placeholder="Acme Corp">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Status *</label>
+                                <select id="new-client-status" class="form-input w-full px-2 py-1.5 rounded text-sm" required>
+                                    <option value="cold">❄️ Cold Lead</option>
+                                    <option value="warm">🌡️ Warm Lead</option>
+                                    <option value="hot">🔥 Hot Lead</option>
+                                    <option value="client">✅ Active Client</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Priority</label>
+                                <select id="new-client-priority" class="form-input w-full px-2 py-1.5 rounded text-sm">
+                                    <option value="low">🟢 Low</option>
+                                    <option value="medium" selected>🟡 Medium</option>
+                                    <option value="high">🔴 High</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Section 2: Contact & Business Details -->
+                    <div class="bg-gradient-to-r from-green-50 to-teal-50 rounded-lg p-3">
+                        <h4 class="font-medium text-gray-900 mb-2 flex items-center text-sm">
+                            <span class="w-4 h-4 primary-gradient rounded flex items-center justify-center mr-2 text-white text-xs">🏢</span>
+                            Contact & Business Details
+                        </h4>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Email</label>
+                                <input type="email" id="new-client-email" class="form-input w-full px-2 py-1.5 rounded text-sm" placeholder="john@acme.com">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Phone</label>
+                                <input type="tel" id="new-client-phone" class="form-input w-full px-2 py-1.5 rounded text-sm" placeholder="+1 (555) 123-4567">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Industry</label>
+                                <select id="new-client-industry" class="form-input w-full px-2 py-1.5 rounded text-sm">
+                                    <option value="">Select Industry</option>
+                                    <option value="technology">💻 Technology</option>
+                                    <option value="healthcare">🏥 Healthcare</option>
+                                    <option value="finance">💰 Finance</option>
+                                    <option value="retail">🛍️ Retail</option>
+                                    <option value="manufacturing">🏭 Manufacturing</option>
+                                    <option value="education">🎓 Education</option>
+                                    <option value="real-estate">🏠 Real Estate</option>
+                                    <option value="other">🌐 Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Deal Value ($)</label>
+                                <input type="number" id="new-client-deal-value" class="form-input w-full px-2 py-1.5 rounded text-sm" min="0" step="1000" placeholder="50000">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Section 3: Documents & Notes -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg p-3">
+                            <h4 class="font-medium text-gray-900 mb-2 flex items-center text-sm">
+                                <span class="w-4 h-4 primary-gradient rounded flex items-center justify-center mr-2 text-white text-xs">📄</span>
+                                Documents Upload
+                            </h4>
+                            <input type="file" id="new-client-docs" multiple 
+                                   accept=".pdf,.txt,.doc,.docx,.ppt,.pptx,.csv,.xlsx" 
+                                   class="form-input w-full px-2 py-1.5 rounded text-sm">
+                            <p class="text-xs text-gray-500 mt-1">
+                                Upload RFPs, business plans - AI will analyze automatically
+                            </p>
+                        </div>
+                        
+                        <div class="bg-gradient-to-r from-gray-50 to-slate-50 rounded-lg p-3">
+                            <h4 class="font-medium text-gray-900 mb-2 flex items-center text-sm">
+                                <span class="w-4 h-4 primary-gradient rounded flex items-center justify-center mr-2 text-white text-xs">📝</span>
+                                Notes & Requirements
+                            </h4>
+                            <textarea id="new-client-notes" rows="2" class="form-input w-full px-2 py-1.5 rounded text-sm" 
+                                      placeholder="Business needs, pain points, objectives..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- AI Features Highlight -->
+                    <div class="primary-gradient rounded-lg p-3 text-white">
+                        <h4 class="font-medium mb-2 flex items-center text-sm">
+                            <span class="w-4 h-4 bg-white bg-opacity-20 rounded flex items-center justify-center mr-2 text-xs">🤖</span>
+                            AI-Powered Features Included
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-1 text-xs">
+                            <div class="flex items-center space-x-2">
+                                <span class="w-3 h-3 bg-green-400 rounded-full flex items-center justify-center text-xs">✓</span>
+                                <span>Dedicated AI workspace creation</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="w-3 h-3 bg-green-400 rounded-full flex items-center justify-center text-xs">✓</span>
+                                <span>Automatic document processing & embedding</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="w-3 h-3 bg-green-400 rounded-full flex items-center justify-center text-xs">✓</span>
+                                <span>AI analysis of client needs & service matching</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="w-3 h-3 bg-green-400 rounded-full flex items-center justify-center text-xs">✓</span>
+                                <span>Persistent data storage & activity tracking</span>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>            
+            <!-- Modal Footer -->
+            <div class="bg-gray-50 px-3 py-2 flex space-x-2">
+                <button type="button" id="cancel-add-client-footer" class="flex-1 btn-secondary px-3 py-2 rounded text-sm font-medium">
+                    Cancel
+                </button>
+                <button type="submit" form="add-client-form" class="flex-2 btn-primary px-3 py-2 rounded text-sm font-medium">
+                    🚀 Create Client & AI Workspace
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Configuration ---
+        const ANYTHINGLLM_CONFIG = {
+            baseUrl: 'https://socialgarden-anything-llm.vo0egb.easypanel.host',
+            apiKey: 'F7C84WV-75N4QWH-P9ERFRV-CWJ146T',
+            workspace: 'main'
+        };        // --- Application State ---
+        let currentTab = 'knowledge';        let clients = [];
+        let services = [];
+        let selectedClient = null;
+        let clientWorkspaces = new Map(); // Track client workspaces
+        
+        // --- Initialize ---
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTabs();
+            initializeKnowledgeVisualization();
+            initializeChatInterface();
+            initializeViewToggles();
+            initializeClientManagement();
+            loadServicesFromKB();
+            loadClientsFromStorage(); // Load persisted clients
+        });
+
+        // --- Tab Management ---
+        function initializeTabs() {
+            const tabs = ['knowledge', 'clients', 'sow', 'innovation'];
+            
+            tabs.forEach(tab => {
+                document.getElementById(`tab-${tab}`).addEventListener('click', () => {
+                    switchTab(tab);
+                });
+            });
+        }
+
+        function switchTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('[id^="tab-"]').forEach(btn => {
+                btn.className = btn.id === `tab-${tab}` ? 
+                    'tab-active px-6 py-3 rounded-lg font-medium transition-all' :
+                    'tab-inactive px-6 py-3 rounded-lg font-medium transition-all';
+            });
+
+            // Update content
+            document.querySelectorAll('[id^="content-"]').forEach(content => {
+                content.style.display = content.id === `content-${tab}` ? 'block' : 'none';
+            });
+
+            currentTab = tab;
+        }        // --- Knowledge Visualization ---
+        function initializeKnowledgeVisualization() {
+            // Set default view to grid and render when services are loaded
+            console.log('Initializing knowledge visualization...');
+        }
+
+        // --- Chat Interface ---
+        function initializeChatInterface() {
+            const chatInput = document.getElementById('chat-input');
+            const sendButton = document.getElementById('send-chat');
+            
+            sendButton.addEventListener('click', sendChatMessage);
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendChatMessage();
+            });
+
+            // Quick questions
+            document.querySelectorAll('.quick-question').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    chatInput.value = btn.textContent;
+                    sendChatMessage();
+                });
+            });
+        }        // --- Markdown Helper ---
+        function parseMarkdown(text) {
+            // Simple markdown parser for basic formatting
+            let html = text
+                // Headers
+                .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+                .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+                .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+                // Bold
+                .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
+                .replace(/__(.*?)__/gim, '<strong>$1</strong>')
+                // Italic
+                .replace(/\*(.*?)\*/gim, '<em>$1</em>')
+                .replace(/_(.*?)_/gim, '<em>$1</em>')
+                // Code blocks
+                .replace(/```([\s\S]*?)```/gim, '<pre><code>$1</code></pre>')
+                // Inline code
+                .replace(/`([^`]+)`/gim, '<code>$1</code>')
+                // Lists
+                .replace(/^\* (.*$)/gim, '<li>$1</li>')
+                .replace(/^- (.*$)/gim, '<li>$1</li>')
+                .replace(/^\d+\. (.*$)/gim, '<li>$1</li>')
+                // Line breaks
+                .replace(/\n\n/gim, '</p><p>')
+                .replace(/\n/gim, '<br>');
+            
+            // Wrap in paragraphs and handle lists
+            html = '<p>' + html + '</p>';
+            html = html.replace(/<p>(<li>.*<\/li>)<\/p>/gim, '<ul>$1</ul>');
+            html = html.replace(/<\/li><br><li>/gim, '</li><li>');
+            html = html.replace(/<p><\/p>/gim, '');
+            
+            return html;
+        }
+
+        async function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            if (!message) return;
+
+            const chatMessages = document.getElementById('chat-messages');
+            
+            // Add user message
+            const userMessage = document.createElement('div');
+            userMessage.className = 'user-message chat-message';
+            userMessage.innerHTML = `<p>${message}</p>`;
+            chatMessages.appendChild(userMessage);
+            
+            // Clear input
+            input.value = '';
+            
+            // Show typing indicator
+            const typingIndicator = document.createElement('div');
+            typingIndicator.className = 'typing-indicator chat-message';
+            typingIndicator.innerHTML = `
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            `;
+            chatMessages.appendChild(typingIndicator);
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            try {
+                // Call AnythingLLM API
+                const response = await callAnythingLLM(message);
+                
+                // Remove typing indicator
+                typingIndicator.remove();
+                
+                // Add AI response with markdown parsing
+                const aiMessage = document.createElement('div');
+                aiMessage.className = 'ai-message chat-message';
+                aiMessage.innerHTML = parseMarkdown(response);
+                chatMessages.appendChild(aiMessage);
+                
+            } catch (error) {
+                typingIndicator.remove();
+                const errorMessage = document.createElement('div');
+                errorMessage.className = 'ai-message chat-message border border-red-200';
+                errorMessage.innerHTML = `<p class="text-red-600">Sorry, I encountered an error: ${error.message}</p>`;
+                chatMessages.appendChild(errorMessage);
+            }
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }// --- Client Management ---
+        function initializeClientManagement() {
+            document.getElementById('add-client').addEventListener('click', () => {
+                document.getElementById('add-client-modal').classList.remove('hidden');
+                document.getElementById('add-client-modal').classList.add('flex');
+            });            document.getElementById('cancel-add-client').addEventListener('click', () => {
+                document.getElementById('add-client-modal').classList.add('hidden');
+                document.getElementById('add-client-modal').classList.remove('flex');
+            });
+            
+            document.getElementById('cancel-add-client-footer').addEventListener('click', () => {
+                document.getElementById('add-client-modal').classList.add('hidden');
+                document.getElementById('add-client-modal').classList.remove('flex');
+            });
+
+            document.getElementById('add-client-form').addEventListener('submit', addClient);
+            
+            // Search functionality
+            document.getElementById('client-search').addEventListener('input', filterClients);
+            document.getElementById('status-filter').addEventListener('change', filterClients);
+        }
+
+        // Load clients from localStorage
+        function loadClientsFromStorage() {
+            const savedClients = localStorage.getItem('socialgarden_clients');
+            const savedWorkspaces = localStorage.getItem('socialgarden_client_workspaces');
+            
+            if (savedClients) {
+                clients = JSON.parse(savedClients);
+                renderClientList();
+            }
+            
+            if (savedWorkspaces) {
+                clientWorkspaces = new Map(JSON.parse(savedWorkspaces));
+            }
+        }
+
+        // Save clients to localStorage
+        function saveClientsToStorage() {
+            localStorage.setItem('socialgarden_clients', JSON.stringify(clients));
+            localStorage.setItem('socialgarden_client_workspaces', JSON.stringify([...clientWorkspaces]));
+        }        async function addClient(e) {
+            e.preventDefault();
+            
+            const clientName = document.getElementById('new-client-name').value;
+            const clientStatus = document.getElementById('new-client-status').value;
+            const clientNotes = document.getElementById('new-client-notes').value;
+            const clientDocs = document.getElementById('new-client-docs').files;
+            
+            // Get additional CRM fields
+            const clientCompany = document.getElementById('new-client-company').value;
+            const clientIndustry = document.getElementById('new-client-industry').value;
+            const clientEmail = document.getElementById('new-client-email').value;
+            const clientPhone = document.getElementById('new-client-phone').value;
+            const clientDealValue = parseInt(document.getElementById('new-client-deal-value').value) || 0;
+            const clientPriority = document.getElementById('new-client-priority').value;
+              // Show loading state
+            const submitBtn = document.querySelector('button[form="add-client-form"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Creating Client & Workspace...';
+            submitBtn.disabled = true;
+            
+            try {
+                // Create workspace in AnythingLLM for this client
+                const workspaceSlug = await createClientWorkspace(clientName);
+                
+                // Upload documents to the client's workspace
+                const uploadedDocs = [];
+                if (clientDocs.length > 0) {
+                    for (let file of clientDocs) {
+                        try {
+                            const docResult = await uploadDocumentToWorkspace(file, workspaceSlug);
+                            uploadedDocs.push(docResult);
+                        } catch (error) {
+                            console.error('Error uploading document:', error);
+                            showToast(`Warning: Failed to upload ${file.name}`, 'warning');
+                        }
+                    }
+                }
+                
+                const newClient = {
+                    id: Date.now(),
+                    name: clientName,
+                    company: clientCompany,
+                    industry: clientIndustry,
+                    email: clientEmail,
+                    phone: clientPhone,
+                    status: clientStatus,
+                    priority: clientPriority,
+                    notes: clientNotes,
+                    documents: uploadedDocs,
+                    workspaceSlug: workspaceSlug,
+                    dealValue: clientDealValue,
+                    createdAt: new Date(),
+                    lastContactDate: new Date(),
+                    activities: [{
+                        id: Date.now(),
+                        activity: 'Client created with AI workspace',
+                        timestamp: new Date(),
+                        type: 'system'
+                    }],
+                    aiInsights: null,
+                    lastAnalyzed: null
+                };
+
+                clients.push(newClient);
+                clientWorkspaces.set(newClient.id, workspaceSlug);
+                
+                // Save to localStorage
+                saveClientsToStorage();
+                
+                renderClientList();
+                
+                // Close modal and reset form
+                document.getElementById('add-client-modal').classList.add('hidden');
+                document.getElementById('add-client-modal').classList.remove('flex');
+                document.getElementById('add-client-form').reset();
+                
+                showToast(`✅ Client "${clientName}" created with dedicated AI workspace!`, 'success');
+                
+                // Auto-select the new client for analysis
+                selectClient(newClient.id);
+                
+            } catch (error) {
+                console.error('Error creating client:', error);
+                showToast('❌ Error creating client workspace. Please try again.', 'error');
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Create a workspace in AnythingLLM for the client
+        async function createClientWorkspace(clientName) {
+            const workspaceName = `Client: ${clientName}`;
+            const workspaceSlug = `client-${clientName.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${Date.now()}`;
+            
+            const response = await fetch(`${ANYTHINGLLM_CONFIG.baseUrl}/api/v1/workspace/new`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${ANYTHINGLLM_CONFIG.apiKey}`,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: workspaceName,
+                    similarityThreshold: 0.7,
+                    openAiTemp: 0.7,
+                    openAiHistory: 20,
+                    openAiPrompt: `You are an AI assistant specialized in analyzing client information for Social Garden. You have access to client documents and should provide insights about their business needs, potential service matches, and strategic recommendations based on the uploaded materials.`,
+                    queryRefusalResponse: "I can only provide insights based on the client information and documents available in this workspace.",
+                    chatMode: "chat",
+                    topN: 4
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to create workspace: ${response.status} ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            return data.workspace.slug;
+        }
+
+        // Upload document to client's workspace
+        async function uploadDocumentToWorkspace(file, workspaceSlug) {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('addToWorkspaces', workspaceSlug);
+
+            const response = await fetch(`${ANYTHINGLLM_CONFIG.baseUrl}/api/v1/document/upload`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${ANYTHINGLLM_CONFIG.apiKey}`
+                },
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to upload document: ${response.status} ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            return {
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                uploadedAt: new Date(),
+                anythingLLMDoc: data.documents[0]
+            };
+        }
+
+        function filterClients() {
+            const searchTerm = document.getElementById('client-search').value.toLowerCase();
+            const statusFilter = document.getElementById('status-filter').value;
+            
+            const filteredClients = clients.filter(client => {
+                const matchesSearch = client.name.toLowerCase().includes(searchTerm) || 
+                                    client.notes.toLowerCase().includes(searchTerm);
+                const matchesStatus = !statusFilter || client.status === statusFilter;
+                return matchesSearch && matchesStatus;
+            });
+            
+            renderClientList(filteredClients);
+        }        function renderClientList(clientsToRender = clients) {
+            const clientList = document.getElementById('client-list');
+            
+            if (clientsToRender.length === 0) {
+                clientList.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <div class="mb-4">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.196-2.121M17 20H7m10 0v-2c0-5.523-4.477-10-10-10s-10 4.477-10 10v2m20 0v-2a5 5 0 00-10-10 5 5 0 00-10 10v2"/>
+                            </svg>
+                        </div>
+                        <p>No clients yet. Add your first client to get started!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            clientList.innerHTML = clientsToRender.map(client => {
+                const statusColors = {
+                    'cold': 'bg-blue-50 border-blue-200 text-blue-800',
+                    'warm': 'bg-yellow-50 border-yellow-200 text-yellow-800',
+                    'hot': 'bg-red-50 border-red-200 text-red-800',
+                    'client': 'bg-green-50 border-green-200 text-green-800'
+                };
+                
+                const statusColor = statusColors[client.status] || 'bg-gray-50 border-gray-200 text-gray-800';
+                  return `
+                    <div class="client-card ${statusColor} p-4 rounded-lg border-2 cursor-pointer hover:shadow-md transition-all" 
+                         data-client-id="${client.id}" onclick="selectClient('${client.id}')">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <h3 class="font-semibold text-gray-900">${client.name}</h3>
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full ${statusColor}">
+                                        ${client.status.charAt(0).toUpperCase() + client.status.slice(1)}
+                                    </span>
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-2 text-xs text-gray-600 mb-2">
+                                    <div>📅 Created: ${new Date(client.createdAt).toLocaleDateString()}</div>
+                                    <div>📄 Docs: ${client.documents?.length || 0}</div>
+                                    <div>💰 Value: $${client.dealValue?.toLocaleString() || 0}</div>
+                                    <div>🤖 Workspace: ${client.workspaceSlug ? '✅' : '❌'}</div>
+                                </div>
+                                
+                                ${client.notes ? `<p class="text-xs text-gray-500 mt-1 truncate">${client.notes}</p>` : ''}
+                                
+                                ${client.aiInsights ? `
+                                    <div class="mt-2 p-2 bg-purple-50 rounded text-xs">
+                                        <span class="text-purple-700 font-medium">🧠 AI Insight:</span>
+                                        <span class="text-purple-600">${client.aiInsights.slice(0, 100)}...</span>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            
+                            <div class="flex flex-col items-end space-y-1">
+                                <div class="text-xs text-gray-400">
+                                    ${new Date(client.lastContactDate || client.createdAt).toLocaleDateString()}
+                                </div>
+                                <button onclick="event.stopPropagation(); deleteClient(${client.id})" 
+                                        class="text-red-400 hover:text-red-600 text-xs">
+                                    🗑️
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }        function selectClient(clientIdOrEvent) {
+            let clientId;
+            let eventTarget = null;
+            
+            // Check if called with event or direct client ID
+            if (typeof clientIdOrEvent === 'object' && clientIdOrEvent.currentTarget) {
+                // Called from event handler
+                clientId = clientIdOrEvent.currentTarget.dataset.clientId;
+                eventTarget = clientIdOrEvent.currentTarget;
+            } else {
+                // Called directly with client ID
+                clientId = clientIdOrEvent;
+                // Find the corresponding card element
+                eventTarget = document.querySelector(`[data-client-id="${clientId}"]`);
+            }
+            
+            selectedClient = clients.find(c => c.id === clientId);
+            if (selectedClient) {
+                analyzeClient(selectedClient);
+                
+                // Update UI to show selected state
+                document.querySelectorAll('.client-card').forEach(card => {
+                    card.classList.remove('ring-2', 'ring-blue-500');
+                });
+                if (eventTarget) {
+                    eventTarget.classList.add('ring-2', 'ring-blue-500');
+                }
+            }
+        }
+
+        async function analyzeClient(client) {
+            const analysisDiv = document.getElementById('client-analysis');
+            
+            analysisDiv.innerHTML = `
+                <div class="text-center">
+                    <div class="animate-spin h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                    <p class="text-sm text-gray-600">Analyzing ${client.name} with AI...</p>
+                    <p class="text-xs text-gray-500 mt-1">Using dedicated workspace & documents</p>
+                </div>
+            `;
+
+            try {
+                let analysisPrompt = `Please provide a comprehensive client analysis for ${client.name}. Include:
+
+1. 🎯 Business Profile Summary
+2. 📊 Potential Service Matches (based on our service offerings)
+3. 💡 Strategic Recommendations
+4. 🚀 Next Steps & Opportunities
+5. ⚠️ Risk Assessment
+
+Client Status: ${client.status}
+Deal Value: $${client.dealValue || 0}
+Documents Available: ${client.documents?.length || 0}
+Notes: ${client.notes || 'None'}
+
+Please analyze any uploaded documents and provide actionable insights.`;
+
+                let analysisResult;
+                
+                if (client.workspaceSlug) {
+                    // Use client-specific workspace for analysis
+                    analysisResult = await callAnythingLLMWorkspace(analysisPrompt, client.workspaceSlug);
+                } else {
+                    // Fallback to general analysis
+                    analysisResult = await callAnythingLLM(analysisPrompt);
+                }
+                
+                // Update client with AI insights and save
+                client.aiInsights = analysisResult;
+                client.lastAnalyzed = new Date();
+                saveClientsToStorage();
+                
+                analysisDiv.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-semibold text-gray-900 flex items-center">
+                                🧠 AI Analysis: ${client.name}
+                            </h3>
+                            <button onclick="refreshClientAnalysis(${client.id})" 
+                                    class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200">
+                                🔄 Refresh
+                            </button>
+                        </div>
+                        
+                        <div class="bg-gray-50 rounded-lg p-4 max-h-96 overflow-y-auto">
+                            <div class="text-sm text-gray-700 whitespace-pre-wrap">${analysisResult}</div>
+                        </div>
+                        
+                        <div class="flex space-x-2">
+                            <button onclick="addClientActivity(${client.id}, 'AI Analysis Generated')" 
+                                    class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded hover:bg-green-200">
+                                📝 Log Activity
+                            </button>
+                            <button onclick="generateSOWForClient(${client.id})" 
+                                    class="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded hover:bg-purple-200">
+                                📋 Generate SOW
+                            </button>
+                            <button onclick="openClientWorkspace(${client.id})" 
+                                    class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded hover:bg-blue-200">
+                                🚀 Open Workspace
+                            </button>
+                        </div>
+                        
+                        ${client.documents && client.documents.length > 0 ? `
+                            <div class="mt-4 p-3 bg-blue-50 rounded">
+                                <h4 class="text-sm font-medium text-blue-900 mb-2">📄 Client Documents (${client.documents.length})</h4>
+                                <div class="space-y-1">
+                                    ${client.documents.map(doc => `
+                                        <div class="text-xs text-blue-700 flex justify-between">
+                                            <span>${doc.name}</span>
+                                            <span>${(doc.size / 1024).toFixed(1)}KB</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        <div class="text-xs text-gray-500 text-center pt-2 border-t">
+                            Last analyzed: ${new Date(client.lastAnalyzed || Date.now()).toLocaleString()}
+                        </div>
+                    </div>
+                `;
+                
+            } catch (error) {
+                console.error('Analysis error:', error);
+                analysisDiv.innerHTML = `
+                    <div class="text-center py-8">
+                        <div class="text-red-500 mb-2">❌ Analysis Error</div>
+                        <p class="text-sm text-gray-600 mb-4">${error.message}</p>
+                        <button onclick="analyzeClient(selectedClient)" 
+                                class="text-xs bg-red-100 text-red-700 px-3 py-1 rounded hover:bg-red-200">
+                            Try Again
+                        </button>
+                    </div>                `;
+            }
+        }
+
+        // Helper functions for enhanced CRM features
+        async function callAnythingLLMWorkspace(message, workspaceSlug) {
+            const response = await fetch(`${ANYTHINGLLM_CONFIG.baseUrl}/api/v1/workspace/${workspaceSlug}/chat`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${ANYTHINGLLM_CONFIG.apiKey}`,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: message,
+                    mode: 'chat'
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Workspace API request failed: ${response.status} ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            return data.textResponse || data.message || 'No response received';
+        }
+
+        async function refreshClientAnalysis(clientId) {
+            const client = clients.find(c => c.id === clientId);
+            if (client) {
+                await analyzeClient(client);
+                showToast('🔄 Client analysis refreshed!', 'success');
+            }
+        }
+
+        function addClientActivity(clientId, activity) {
+            const client = clients.find(c => c.id === clientId);
+            if (client) {
+                if (!client.activities) client.activities = [];
+                client.activities.unshift({
+                    id: Date.now(),
+                    activity: activity,
+                    timestamp: new Date(),
+                    type: 'system'
+                });
+                saveClientsToStorage();
+                showToast('📝 Activity logged!', 'success');
+            }
+        }
+
+        function generateSOWForClient(clientId) {
+            const client = clients.find(c => c.id === clientId);
+            if (client) {
+                // Open SOW generator with client context
+                const sowUrl = `enhanced-sow-demo.html?clientId=${clientId}&clientName=${encodeURIComponent(client.name)}`;
+                window.open(sowUrl, '_blank');
+                addClientActivity(clientId, 'SOW Generation Initiated');
+            }
+        }
+
+        function openClientWorkspace(clientId) {
+            const client = clients.find(c => c.id === clientId);
+            if (client && client.workspaceSlug) {
+                // In a real implementation, this would open the AnythingLLM workspace
+                const workspaceUrl = `${ANYTHINGLLM_CONFIG.baseUrl}/workspace/${client.workspaceSlug}`;
+                window.open(workspaceUrl, '_blank');
+                addClientActivity(clientId, 'Workspace Accessed');
+            } else {
+                showToast('⚠️ No workspace found for this client', 'warning');
+            }
+        }
+
+        function deleteClient(clientId) {
+            if (confirm('Are you sure you want to delete this client? This will also remove their dedicated workspace.')) {
+                const clientIndex = clients.findIndex(c => c.id === clientId);
+                if (clientIndex > -1) {
+                    const client = clients[clientIndex];
+                    clients.splice(clientIndex, 1);
+                    clientWorkspaces.delete(clientId);
+                    saveClientsToStorage();
+                    renderClientList();
+                    
+                    // Clear analysis if this client was selected
+                    if (selectedClient && selectedClient.id === clientId) {
+                        selectedClient = null;
+                        document.getElementById('client-analysis').innerHTML = `
+                            <div class="text-center py-8 text-gray-500">
+                                Select a client to see AI-powered analysis
+                            </div>
+                        `;
+                    }
+                    
+                    showToast(`Client "${client.name}" deleted`, 'success');
+                }
+            }
+        }
+
+        // Toast notification system
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            const bgColor = {
+                'success': 'bg-green-500',
+                'error': 'bg-red-500',
+                'warning': 'bg-yellow-500',
+                'info': 'bg-blue-500'
+            }[type] || 'bg-blue-500';
+            
+            toast.className = `fixed top-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300 transform translate-x-0`;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('translate-x-full', 'opacity-0');
+                setTimeout(() => document.body.removeChild(toast), 300);
+            }, 3000);
+        }        // --- View Toggle Functions ---
+        let currentView = 'grid';
+        
+        function initializeViewToggles() {
+            const treeBtn = document.getElementById('view-tree');
+            const networkBtn = document.getElementById('view-network');
+            const categoriesBtn = document.getElementById('view-categories');
+            
+            treeBtn.addEventListener('click', () => switchView('tree'));
+            networkBtn.addEventListener('click', () => switchView('network'));
+            categoriesBtn.addEventListener('click', () => switchView('categories'));
+        }
+          function switchView(viewType) {
+            currentView = viewType;
+            
+            // Update button states
+            document.querySelectorAll('[id^="view-"]').forEach(btn => {
+                btn.className = 'btn-secondary px-4 py-2 rounded-lg text-sm font-medium';
+            });
+            document.getElementById(`view-${viewType}`).className = 'btn-primary px-4 py-2 rounded-lg text-sm font-medium';
+            
+            // Render the visualization based on view type
+            renderServiceVisualization();
+        }
+        
+        function renderServiceVisualization() {
+            const container = document.getElementById('knowledge-visualization');
+            
+            switch(currentView) {
+                case 'tree':
+                    renderTreeView(container);
+                    break;
+                case 'network':
+                    renderNetworkView(container);
+                    break;
+                case 'categories':
+                    renderCategoryView(container);
+                    break;
+                default:
+                    renderGridView(container);
+            }
+        }
+        
+        function renderTreeView(container) {
+            // Group services by category
+            const categories = {};
+            services.forEach(service => {
+                if (!categories[service.category]) {
+                    categories[service.category] = [];
+                }
+                categories[service.category].push(service);
+            });
+            
+            container.innerHTML = `
+                <div class="tree-view p-4 h-full overflow-y-auto">
+                    <div class="space-y-4">
+                        ${Object.entries(categories).map(([category, categoryServices]) => `
+                            <div class="category-branch">
+                                <div class="category-header flex items-center p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500 cursor-pointer" onclick="toggleCategory('${category}')">
+                                    <span class="category-icon mr-2">📁</span>
+                                    <h3 class="font-semibold text-lg text-blue-900">${category}</h3>
+                                    <span class="ml-auto text-sm text-blue-600">${categoryServices.length} services</span>
+                                </div>
+                                <div id="category-${category.replace(/\s+/g, '-')}" class="category-services ml-6 mt-2 space-y-2">                                    ${categoryServices.map(service => `
+                                        <div class="service-leaf flex items-center p-2 bg-white rounded border hover:bg-gray-50 cursor-pointer" onclick="showServiceDetailsById(${service.id})">
+                                            <span class="service-icon mr-2">📄</span>
+                                            <div class="flex-1">
+                                                <span class="text-sm font-medium text-gray-900">${service.name}</span>
+                                                <div class="text-xs text-gray-500">${service.pricing} • ${service.hours}h</div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
+        function renderNetworkView(container) {
+            container.innerHTML = `
+                <div class="network-view p-4 h-full relative">
+                    <svg class="w-full h-full" viewBox="0 0 800 400">
+                        <!-- Central Hub -->
+                        <circle cx="400" cy="200" r="40" fill="#3B82F6" stroke="#1E40AF" stroke-width="2"/>
+                        <text x="400" y="205" text-anchor="middle" fill="white" font-size="12" font-weight="bold">Services</text>
+                        
+                        ${services.map((service, index) => {
+                            const angle = (index / services.length) * 2 * Math.PI;
+                            const x = 400 + 150 * Math.cos(angle);
+                            const y = 200 + 150 * Math.sin(angle);
+                            const color = service.category === 'Marketing Automation' ? '#10B981' : 
+                                         service.category === 'Audit & Consultation' ? '#F59E0B' : '#8B5CF6';
+                            return `
+                                <!-- Connection Line -->
+                                <line x1="400" y1="200" x2="${x}" y2="${y}" stroke="#E5E7EB" stroke-width="1"/>
+                                  <!-- Service Node -->
+                                <circle cx="${x}" cy="${y}" r="25" fill="${color}" stroke="#374151" stroke-width="1" 
+                                        class="cursor-pointer hover:r-30" onclick="showServiceDetailsById(${service.id})"/>
+                                <text x="${x}" y="${y-30}" text-anchor="middle" fill="#374151" font-size="10" class="max-w-20">
+                                    ${service.name.split(' ').slice(0, 3).join(' ')}
+                                </text>
+                                <text x="${x}" y="${y+40}" text-anchor="middle" fill="#6B7280" font-size="8">
+                                    ${service.pricing}
+                                </text>
+                            `;
+                        }).join('')}
+                    </svg>
+                    
+                    <!-- Legend -->
+                    <div class="absolute bottom-4 right-4 bg-white p-3 rounded-lg shadow border text-xs">
+                        <div class="space-y-1">
+                            <div class="flex items-center"><div class="w-3 h-3 bg-green-500 rounded-full mr-2"></div>Marketing Automation</div>
+                            <div class="flex items-center"><div class="w-3 h-3 bg-yellow-500 rounded-full mr-2"></div>Audit & Consultation</div>
+                            <div class="flex items-center"><div class="w-3 h-3 bg-purple-500 rounded-full mr-2"></div>Strategy & Consultation</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function renderCategoryView(container) {
+            // Group services by category
+            const categories = {};
+            services.forEach(service => {
+                if (!categories[service.category]) {
+                    categories[service.category] = [];
+                }
+                categories[service.category].push(service);
+            });
+            
+            container.innerHTML = `
+                <div class="category-view p-4 h-full overflow-y-auto">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        ${Object.entries(categories).map(([category, categoryServices]) => {
+                            const avgPrice = categoryServices.reduce((sum, s) => sum + parseInt(s.pricing.replace(/[$,]/g, '')), 0) / categoryServices.length;
+                            const totalHours = categoryServices.reduce((sum, s) => sum + s.hours, 0);
+                            return `
+                                <div class="category-card bg-white border rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                                    <div class="p-4 border-b bg-gradient-to-r from-blue-50 to-purple-50">
+                                        <h3 class="font-bold text-lg text-gray-900">${category}</h3>
+                                        <div class="text-sm text-gray-600 mt-1">
+                                            ${categoryServices.length} services • $${Math.round(avgPrice).toLocaleString()} avg • ${totalHours}h total
+                                        </div>
+                                    </div>
+                                    <div class="p-4 space-y-2">
+                                        ${categoryServices.map(service => `                                            <div class="service-item p-2 bg-gray-50 rounded hover:bg-gray-100 cursor-pointer transition-colors" 
+                                                 onclick="showServiceDetailsById(${service.id})">>
+                                                <div class="text-sm font-medium text-gray-900">${service.name.length > 40 ? service.name.substring(0, 37) + '...' : service.name}</div>
+                                                <div class="text-xs text-gray-500 flex justify-between">
+                                                    <span>${service.pricing}</span>
+                                                    <span>${service.hours}h</span>
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
+        function toggleCategory(category) {
+            const categoryId = 'category-' + category.replace(/\s+/g, '-');
+            const element = document.getElementById(categoryId);
+            const header = element.previousElementSibling;
+            const icon = header.querySelector('.category-icon');
+            
+            if (element.style.display === 'none') {
+                element.style.display = 'block';
+                icon.textContent = '📂';
+            } else {
+                element.style.display = 'none';
+                icon.textContent = '📁';
+            }
+        }
+
+        // --- Service Loading ---
+        async function loadServicesFromKB() {
+            // Real services from KB.md
+            services = [
+                {
+                    id: 1,
+                    name: "Marketing Automation | Email Template Services",
+                    category: "Marketing Automation",
+                    pricing: "$9,350",
+                    hours: 70,
+                    avgRate: "$133.57",
+                    description: "Email Template Design, Development & Deployment with UX Design, Testing & Rendering",
+                    deliverables: [
+                        "1x Email Template Design, Development & Deployment",
+                        "Email Template Wireframe Design", 
+                        "UX Design: Modular prototype in Figma (Max: 4 blocks, 30 modules)",
+                        "Email Template Development & Testing",
+                        "Email Template Deployment into Marketing Automation Platform"
+                    ],
+                    phases: ["Review existing template", "Objective setting", "Wireframe proposal", "User testing", "Go-live handover"],
+                    roles: [
+                        { role: "Tech - Producer - Email Production", hours: 8, rate: 120 },
+                        { role: "Tech - Producer - Design", hours: 8, rate: 120 },
+                        { role: "Tech - Producer - Development", hours: 16, rate: 120 },
+                        { role: "Tech - Producer - Testing", hours: 16, rate: 120 },
+                        { role: "Account Management - Account Manager", hours: 8, rate: 180 }
+                    ]
+                },
+                {
+                    id: 2, 
+                    name: "Marketing Automation | Platform Audit Services",
+                    category: "Audit & Consultation",
+                    pricing: "$10,700",
+                    hours: 56,
+                    avgRate: "$196",
+                    description: "Comprehensive Marketing Automation Platform Current State and Future State Audit",
+                    deliverables: [
+                        "Current State Assessment: Platform Overview & Usage Analysis",
+                        "Technical Audit: Infrastructure Evaluation & Data Quality Check",
+                        "Campaign and Content Assessment",
+                        "Process and Workflow Analysis",
+                        "Future State Recommendations",
+                        "Final Documentation & Process Mapping via Google Slides & Lucid Charts"
+                    ],
+                    phases: ["Current State Assessment", "Technical Audit", "Campaign Analysis", "Future State Recommendations"],
+                    roles: [
+                        { role: "Tech - Head Of - Customer Experience Strategy", hours: 8, rate: 365 },
+                        { role: "Tech - Sr. Consultant - Strategy", hours: 8, rate: 295 },
+                        { role: "Tech - Producer - Documentation Setup", hours: 15, rate: 120 },
+                        { role: "Tech - Specialist - Campaign Optimisation", hours: 5, rate: 180 }
+                    ]
+                },
+                {
+                    id: 3,
+                    name: "Marketing Automation | Landing Page Services", 
+                    category: "Marketing Automation",
+                    pricing: "$7,470",
+                    hours: 52,
+                    avgRate: "$156.50",
+                    description: "Landing Page Setup with Design, Development & Deployment (Max: 4 modules)",
+                    deliverables: [
+                        "1x Landing Page Setup (Max: 4 modules)",
+                        "Landing Page Design & Client Review",
+                        "Landing Page Development & Testing",
+                        "Landing Page Deployment into Marketing Automation Platform",
+                        "Landing Page Form Connection & UX Review"
+                    ],
+                    phases: ["Design", "Development", "Deployment"],
+                    roles: [
+                        { role: "Tech - Producer - Landing Page Production", hours: 8, rate: 120 },
+                        { role: "Tech - Producer - Development", hours: 8, rate: 120 },
+                        { role: "Tech - Specialist - Integration Services", hours: 4, rate: 190 },                        { role: "Tech - Producer - Testing", hours: 8, rate: 120 }
+                    ]
+                },
+                {
+                    id: 4,
+                    name: "Marketing Automation | Customer Journey Mapping Services",
+                    category: "Strategy & Consultation", 
+                    pricing: "$9,900",
+                    hours: 56,
+                    avgRate: "$196",
+                    description: "Customer Journey Mapping with Research, Strategy Development & Future State Recommendations",
+                    deliverables: [
+                        "1x Customer Journey Mapping Document (Figma or Lucid Chart)",
+                        "Market research for each product category",
+                        "Buyer personas for each product category", 
+                        "MA Current State Assessment",
+                        "Future State Recommendations with strategic insights",
+                        "Final Documentation & Process Mapping"
+                    ],
+                    phases: ["Initial Research", "Current State Assessment", "Future State Recommendations", "Documentation"],
+                    roles: [
+                        { role: "Tech - Head Of - Customer Experience Strategy", hours: 6, rate: 365 },
+                        { role: "Tech - Sr. Consultant - Strategy", hours: 6, rate: 295 },
+                        { role: "Tech - Producer - Documentation Setup", hours: 20, rate: 120 },                        { role: "Tech - Specialist - Campaign Orchestration", hours: 6, rate: 180 }
+                    ]
+                },
+                {
+                    id: 5,
+                    name: "Marketing Automation | 6 Month Support Retainer", 
+                    category: "Managed Services",
+                    pricing: "$24,112",
+                    hours: 120,
+                    avgRate: "$201/month",
+                    description: "Monthly Support Retainer covering User Support, Campaign Management, Technical Support & More",
+                    deliverables: [
+                        "User Support: Assistance with questions, troubleshooting, and guidance",
+                        "Technical Support: Resolving technical issues within the platform",
+                        "Campaign Management: Setup, execution, and optimization",
+                        "Lead Management and Sales Pipeline Optimization",
+                        "Email Marketing Support with QA testing",
+                        "Workflow and Automation Configuration"
+                    ],
+                    phases: ["Monthly Support", "Quarterly Reviews", "Ongoing Optimization"],
+                    roles: [
+                        { role: "Tech - Producer - Support & Monitoring", hours: 30, rate: 120 },
+                        { role: "Tech - Specialist - Database Management", hours: 30, rate: 180 },
+                        { role: "Tech - Sr. Consultant - Advisory & Consultation", hours: 30, rate: 295 }
+                    ]
+                },
+                {
+                    id: 6,
+                    name: "Marketing Automation & CRM | 6-month Advisory & Consultation",
+                    category: "Advisory & Consultation",
+                    pricing: "$18,575", 
+                    hours: 100,
+                    avgRate: "$186",
+                    description: "Comprehensive CRM Advisory and Implementation Support covering customization, data migration, and strategic planning",
+                    deliverables: [
+                        "Initial Discovery Meeting and requirements assessment",
+                        "Assessment of Current Systems and Processes",
+                        "Customization and Configuration Support",
+                        "Data Migration & Mapping Strategy",
+                        "Strategic Planning and Roadmap Development",
+                        "Performance Monitoring and Reporting recommendations"
+                    ],
+                    phases: ["Discovery", "Assessment", "Configuration", "Strategic Planning", "Ongoing Support"],
+                    roles: [
+                        { role: "Tech - Head Of - Customer Experience Strategy", hours: 10, rate: 365 },
+                        { role: "Tech - Sr. Architect - Data Strategy", hours: 5, rate: 365 },
+                        { role: "Tech - Specialist - Database Management", hours: 10, rate: 180 },                        { role: "Tech - Producer - Services", hours: 25, rate: 120 }
+                    ]
+                },
+                {
+                    id: 7,
+                    name: "Marketing Automation | Lead Scoring Model Setup",
+                    category: "Configuration & Setup",
+                    pricing: "$7,000", 
+                    hours: 40,
+                    avgRate: "$175",
+                    description: "Lead Scoring Setup with criteria definition, technical configuration, and quality assurance",
+                    deliverables: [
+                        "1x Lead Scoring Setup based on engagement and profile",
+                        "Definition Session for scoring criteria",
+                        "Lead Scoring Field Setup (Profile and Behaviour)",
+                        "Setup Lead Scoring Workflow Logic",
+                        "Quality Assurance & Testing",
+                        "Final Delivery & Go-live with documentation"
+                    ],
+                    phases: ["Definition Session", "Technical Configuration", "Quality Assurance", "Final Delivery"],
+                    roles: [
+                        { role: "Tech - Producer - Lead Scoring Setup", hours: 8, rate: 120 },
+                        { role: "Tech - Specialist - Lead Scoring Setup", hours: 8, rate: 180 },
+                        { role: "Tech - Sr. Consultant - Advisory & Consultation", hours: 8, rate: 295 },
+                        { role: "Tech - Producer - Testing", hours: 6, rate: 120 }
+                    ]
+                },
+                {
+                    id: 8,
+                    name: "Marketing Automation | HubSpot Implementation & Configuration",
+                    category: "Implementation & Setup",
+                    pricing: "$15,000", 
+                    hours: 85,
+                    avgRate: "$176",
+                    description: "Complete HubSpot implementation to streamline marketing and sales operations",
+                    deliverables: [
+                        "Discovery Phase with objectives and timeline definition",
+                        "Initial Account Customisation with user setup",
+                        "Marketing Hub Implementation with tracking and domains",
+                        "Sales Hub Implementation with pipelines and workflows",
+                        "Reporting and Dashboards (4x custom reports max)",
+                        "Go-Live, Deployment, Training Session and Resource Handover"
+                    ],
+                    phases: ["Discovery", "Account Setup", "Marketing Hub", "Sales Hub", "Reporting", "Go-Live"],
+                    roles: [
+                        { role: "Tech - Sr. Consultant - Implementation", hours: 20, rate: 295 },
+                        { role: "Tech - Specialist - Configuration", hours: 25, rate: 180 },
+                        { role: "Tech - Producer - Setup & Testing", hours: 15, rate: 120 },
+                        { role: "Tech - Producer - Training & Documentation", hours: 10, rate: 120 }
+                    ]
+                },
+                {
+                    id: 9,
+                    name: "Marketing Automation | 40-Hour Support Retainer",
+                    category: "Managed Services",
+                    pricing: "$5,490", 
+                    hours: 40,
+                    avgRate: "$137",
+                    description: "2-Month Support Retainer for ongoing marketing automation assistance and optimization",
+                    deliverables: [
+                        "User Support for questions, troubleshooting, and guidance",
+                        "Technical Support for platform issues",
+                        "Lead Management Support for sales pipeline optimization",
+                        "Reporting and Analysis with custom reports",
+                        "List Segmentation and Management assistance",
+                        "Workflow and Automation Configuration reviews",
+                        "Documentation and Knowledge Base Maintenance"
+                    ],
+                    phases: ["Month 1 Support", "Month 2 Support", "Documentation"],
+                    roles: [
+                        { role: "Tech - Producer - Support & Monitoring", hours: 25, rate: 120 },
+                        { role: "Tech - Producer - Reporting", hours: 5, rate: 120 },
+                        { role: "Tech - Head Of - Senior Project Management", hours: 2, rate: 365 },                        { role: "Account Management - Account Manager", hours: 4, rate: 180 }
+                    ]
+                },
+                {
+                    id: 10,
+                    name: "Marketing Automation | Account & Project Management",
+                    category: "Project Management",
+                    pricing: "$4,650", 
+                    hours: 25,
+                    avgRate: "$186",
+                    description: "Dedicated Account and Project Management services for marketing automation projects",
+                    deliverables: [
+                        "Kick-Off Meeting: Align stakeholders and define objectives",
+                        "Work In Progress Meetings: Regular progress tracking",
+                        "Status Updates: Periodic project status communication",
+                        "Change Management Discussions: Support for project changes",
+                        "Internal Briefings: Team coordination and task management",
+                        "Project Plan, Charter, and Quality Assurance Planning"
+                    ],
+                    phases: ["Project Initiation", "Progress Management", "Status Communication", "Project Delivery"],
+                    roles: [
+                        { role: "Account Management - Account Manager", hours: 10, rate: 180 },
+                        { role: "Account Management - Senior Account Manager", hours: 10, rate: 210 },
+                        { role: "Tech - Delivery - Project Management", hours: 5, rate: 150 }
+                    ]
+                },
+                {
+                    id: 11,
+                    name: "Marketing Automation Services - Project Bundle A",
+                    category: "Project Bundles",
+                    pricing: "$18,937", 
+                    hours: 140,
+                    avgRate: "$135",
+                    description: "Comprehensive Marketing Automation project bundle including Email Templates and additional services",
+                    deliverables: [
+                        "Complete Email Template Services package",
+                        "Marketing Automation setup and configuration",
+                        "User testing and approval workflows",
+                        "Account and Project Management throughout",
+                        "Technical assessment and quality assurance",
+                        "Final delivery and go-live support"
+                    ],
+                    phases: ["Discovery & Planning", "Technical Setup", "Quality Assurance", "Final Delivery"],
+                    roles: [
+                        { role: "Tech - Producer - Email Production", hours: 18, rate: 120 },
+                        { role: "Tech - Producer - Design", hours: 13, rate: 120 },
+                        { role: "Tech - Producer - Development", hours: 17, rate: 120 },
+                        { role: "Tech - Producer - Testing", hours: 16, rate: 120 },
+                        { role: "Account Management - Account Manager", hours: 20, rate: 180 }
+                    ]
+                },
+                {
+                    id: 12,
+                    name: "PROJECT NAME - Custom Service Package",
+                    category: "Custom Services",
+                    pricing: "$6,255", 
+                    hours: 30,
+                    avgRate: "$208",
+                    description: "Custom monthly support package tailored to specific client needs and requirements",
+                    deliverables: [
+                        "User Support for platform questions and guidance",
+                        "Technical Support for platform troubleshooting",
+                        "Lead Management Support for sales pipeline",
+                        "Reporting and Analysis with data model updates",
+                        "List Segmentation and Management for targeted efforts",
+                        "Workflow and Automation Configuration optimization"
+                    ],
+                    phases: ["Setup & Configuration", "Monthly Support", "Optimization"],
+                    roles: [
+                        { role: "Tech - Sr. Consultant - Services", hours: 6, rate: 295 },
+                        { role: "Tech - Specialist - Services", hours: 6, rate: 180 },
+                        { role: "Tech - Producer - Services", hours: 6, rate: 120 },                        { role: "Account Management - Senior Account Manager", hours: 6, rate: 210 }
+                    ]
+                },
+                {
+                    id: 13,
+                    name: "Marketing Automation | Platform 6-Month Premium Support",
+                    category: "Managed Services",
+                    pricing: "$48,225", 
+                    hours: 240,
+                    avgRate: "$201",
+                    description: "Premium 6-Month Support Retainer with enhanced services, platform updates, and comprehensive support",
+                    deliverables: [
+                        "All Standard Support Services plus Enhanced Features",
+                        "Platform Updates and Maintenance recommendations",
+                        "Advanced Campaign Management and Optimization",
+                        "Enhanced Lead Management and Sales Pipeline Support",
+                        "Advanced Reporting and Analytics with insights",
+                        "Comprehensive Documentation and Knowledge Base",
+                        "Ticketing System Setup with Google form to Asana integration"
+                    ],
+                    phases: ["Setup & Onboarding", "Monthly Support Cycles", "Quarterly Reviews", "Optimization"],
+                    roles: [
+                        { role: "Tech - Producer - Support & Monitoring", hours: 60, rate: 120 },
+                        { role: "Tech - Specialist - Database Management", hours: 60, rate: 180 },
+                        { role: "Tech - Sr. Consultant - Advisory & Consultation", hours: 60, rate: 295 },
+                        { role: "Tech - Head Of - Senior Project Management", hours: 15, rate: 365 },
+                        { role: "Account Management - Account Manager", hours: 30, rate: 180 }
+                    ]
+                },
+                {
+                    id: 14,
+                    name: "Marketing Automation | Email Campaign Services",
+                    category: "Campaign Management",
+                    pricing: "$9,587", 
+                    hours: 70,
+                    avgRate: "$137",
+                    description: "Complete Email Campaign setup including automation, SMS build, and landing page integration",
+                    deliverables: [
+                        "Email Production and Campaign Build",
+                        "Landing Page Production and Integration", 
+                        "Campaign Build and Automation Setup",
+                        "Copywriting and Design services",
+                        "Development and Deployment support",
+                        "Testing across multiple devices and platforms",
+                        "Account Management and Project Coordination"
+                    ],
+                    phases: ["Discovery & Planning", "Technical Setup", "Campaign Build", "Testing", "Deployment"],
+                    roles: [
+                        { role: "Tech - Producer - Email Production", hours: 10, rate: 120 },
+                        { role: "Tech - Producer - Landing Page Production", hours: 10, rate: 120 },
+                        { role: "Tech - Producer - Campaign Build", hours: 10, rate: 120 },
+                        { role: "Tech - Producer - Copywriting", hours: 5, rate: 120 },
+                        { role: "Tech - Producer - Design", hours: 5, rate: 120 },                        { role: "Account Management - Account Manager", hours: 10, rate: 180 }
+                    ]
+                },
+                {
+                    id: 15,
+                    name: "Marketing Automation | Discovery & Strategy Package",
+                    category: "Strategy & Consultation",
+                    pricing: "$8,270", 
+                    hours: 60,
+                    avgRate: "$138",
+                    description: "Comprehensive discovery and strategy development for marketing automation implementation",
+                    deliverables: [
+                        "Objective setting and requirements gathering",
+                        "Review of existing systems and processes",
+                        "Identification and understanding of current state",
+                        "Setup and build recommendations",
+                        "User testing strategy and approval workflows",
+                        "Strategic roadmap and implementation plan"
+                    ],
+                    phases: ["Discovery Phase", "Technical Assessment", "Strategy Development", "Recommendations"],
+                    roles: [
+                        { role: "Tech - Head Of - Senior Project Management", hours: 2.5, rate: 365 },
+                        { role: "Tech - Sr. Consultant - Strategy", hours: 15, rate: 295 },
+                        { role: "Tech - Specialist - Assessment", hours: 12, rate: 180 },
+                        { role: "Tech - Producer - Documentation", hours: 10, rate: 120 },
+                        { role: "Account Management - Account Manager", hours: 10, rate: 180 }
+                    ]
+                },
+                {
+                    id: 16,
+                    name: "Marketing Automation | Platform Audit Services",
+                    category: "Audit & Assessment",
+                    pricing: "$10,700", 
+                    hours: 56,
+                    avgRate: "$191",
+                    description: "Current State and Future State Audit of Marketing Automation Platform with comprehensive assessment",
+                    deliverables: [
+                        "Platform Overview: Analysis of existing MA platform setup",
+                        "Configuration Assessment: Review of configurations and CRM integration",
+                        "Campaign Performance Analysis: Evaluation of past campaign effectiveness",
+                        "Audience Segmentation Review: Assessment of list management and segmentation",
+                        "MA Processes Review: Assessment of automation workflows and rules",
+                        "Future State Recommendations: Best practice recommendations and roadmap"
+                    ],
+                    phases: ["Current State Assessment", "Performance Analysis", "Future State Planning", "Recommendations"],
+                    roles: [
+                        { role: "Tech - Head Of - Customer Experience Strategy", hours: 6, rate: 365 },
+                        { role: "Tech - Sr. Consultant - Strategy", hours: 12, rate: 295 },
+                        { role: "Tech - Specialist - Platform Assessment", hours: 18, rate: 180 },
+                        { role: "Tech - Producer - Documentation", hours: 20, rate: 120 }
+                    ]
+                },
+                {
+                    id: 17,
+                    name: "CRM | Pipedrive Implementation & Configuration",
+                    category: "Implementation & Setup",
+                    pricing: "$16,605", 
+                    hours: 90,
+                    avgRate: "$185",
+                    description: "Complete Pipedrive CRM implementation and configuration for sales pipeline optimization",
+                    deliverables: [
+                        "Discovery Phase with objectives and timeline definition",
+                        "Account Setup and User Configuration",
+                        "Sales Pipeline Creation and Deal Stage Setup",
+                        "Custom Fields and Property Configuration",
+                        "Workflow and Automation Setup",
+                        "Reporting and Dashboard Configuration",
+                        "Training Session and Resource Handover"
+                    ],
+                    phases: ["Discovery", "Account Setup", "Pipeline Configuration", "Automation Setup", "Training"],
+                    roles: [
+                        { role: "Tech - Sr. Consultant - Implementation", hours: 25, rate: 295 },
+                        { role: "Tech - Specialist - Configuration", hours: 30, rate: 180 },
+                        { role: "Tech - Producer - Setup & Testing", hours: 20, rate: 120 },
+                        { role: "Tech - Producer - Training & Documentation", hours: 15, rate: 120 }
+                    ]
+                },
+                {
+                    id: 18,
+                    name: "Marketing Automation | MessageMedia SMS Implementation",
+                    category: "Implementation & Setup",
+                    pricing: "$6,399", 
+                    hours: 38,
+                    avgRate: "$168",
+                    description: "MessageMedia SMS platform implementation and integration for marketing automation",
+                    deliverables: [
+                        "MessageMedia Account Setup and Configuration",
+                        "SMS Template Development and Approval",
+                        "Integration with Existing Marketing Automation Platform",
+                        "SMS Workflow and Trigger Setup",
+                        "Compliance and Opt-in Configuration",
+                        "Testing and Quality Assurance",
+                        "Go-Live Support and Documentation"
+                    ],
+                    phases: ["Setup", "Template Development", "Integration", "Testing", "Go-Live"],
+                    roles: [
+                        { role: "Tech - Specialist - Integration Services", hours: 15, rate: 190 },
+                        { role: "Tech - Producer - Configuration", hours: 12, rate: 120 },
+                        { role: "Tech - Producer - Testing", hours: 8, rate: 120 },
+                        { role: "Account Management - Account Manager", hours: 3, rate: 180 }
+                    ]
+                },
+                {
+                    id: 19,
+                    name: "Marketing Automation | SMS Setup & Configuration",
+                    category: "Configuration & Setup",
+                    pricing: "$4,525", 
+                    hours: 25,
+                    avgRate: "$181",
+                    description: "SMS marketing setup and configuration within existing marketing automation platform",
+                    deliverables: [
+                        "SMS Campaign Configuration",
+                        "Template Setup and Approval Workflow",
+                        "Automation Trigger Configuration",
+                        "Compliance and Consent Management Setup",
+                        "Testing Across Multiple Devices",
+                        "Quality Assurance and Final Approval"
+                    ],
+                    phases: ["Configuration", "Template Setup", "Testing", "Final Approval"],
+                    roles: [
+                        { role: "Tech - Specialist - SMS Configuration", hours: 10, rate: 180 },
+                        { role: "Tech - Producer - Template Setup", hours: 8, rate: 120 },
+                        { role: "Tech - Producer - Testing", hours: 5, rate: 120 },
+                        { role: "Account Management - Account Manager", hours: 2, rate: 180 }
+                    ]
+                },
+                {
+                    id: 20,
+                    name: "Marketing Automation | New Lead Welcome Nurture Setup",
+                    category: "Campaign Management",
+                    pricing: "$12,185", 
+                    hours: 85,
+                    avgRate: "$143",
+                    description: "Complete welcome nurture sequence setup for new leads with email automation and workflows",
+                    deliverables: [
+                        "Welcome Series Strategy and Planning",
+                        "Email Template Design and Development", 
+                        "Automation Workflow Configuration",
+                        "Lead Scoring Integration",
+                        "Segmentation and Personalization Setup",
+                        "A/B Testing Configuration",
+                        "Performance Tracking and Analytics Setup"
+                    ],
+                    phases: ["Strategy Planning", "Email Development", "Workflow Setup", "Testing", "Launch"],
+                    roles: [
+                        { role: "Tech - Sr. Consultant - Strategy", hours: 15, rate: 295 },
+                        { role: "Tech - Producer - Email Development", hours: 25, rate: 120 },
+                        { role: "Tech - Specialist - Automation Setup", hours: 20, rate: 180 },
+                        { role: "Tech - Producer - Testing", hours: 15, rate: 120 },
+                        { role: "Account Management - Account Manager", hours: 10, rate: 180 }
+                    ]
+                },
+                {
+                    id: 21,
+                    name: "Marketing Automation | Re-engagement Nurture Setup",
+                    category: "Campaign Management",
+                    pricing: "$6,450", 
+                    hours: 45,
+                    avgRate: "$143",
+                    description: "Re-engagement campaign setup to reactivate dormant leads and improve engagement rates",
+                    deliverables: [
+                        "Re-engagement Strategy Development",
+                        "Audience Segmentation for Inactive Leads",
+                        "Email Template Design and Copywriting",
+                        "Automation Workflow Configuration",
+                        "Win-back Campaign Setup",
+                        "Performance Tracking and Optimization"
+                    ],
+                    phases: ["Strategy Development", "Segmentation", "Campaign Development", "Launch"],
+                    roles: [
+                        { role: "Tech - Sr. Consultant - Strategy", hours: 8, rate: 295 },
+                        { role: "Tech - Producer - Email Development", hours: 15, rate: 120 },
+                        { role: "Tech - Specialist - Automation Setup", hours: 12, rate: 180 },
+                        { role: "Tech - Producer - Testing", hours: 6, rate: 120 },
+                        { role: "Account Management - Account Manager", hours: 4, rate: 180 }
+                    ]
+                },
+                {
+                    id: 22,
+                    name: "Marketing Automation | Re-engagement Nurture & Landing Page Setup",
+                    category: "Campaign Management",
+                    pricing: "$16,060", 
+                    hours: 110,
+                    avgRate: "$146",
+                    description: "Complete re-engagement campaign with custom landing page development and automation setup",
+                    deliverables: [
+                        "Re-engagement Strategy and Landing Page Planning",
+                        "Custom Landing Page Design and Development",
+                        "Email Template Series Development",
+                        "Automation Workflow Configuration", 
+                        "A/B Testing Setup for Landing Pages and Emails",
+                        "Conversion Tracking and Analytics Integration",
+                        "Performance Optimization and Reporting"
+                    ],                    phases: ["Strategy & Planning", "Landing Page Development", "Email Campaign Setup", "Testing", "Launch"],
+                    roles: [
+                        { role: "Tech - Sr. Consultant - Strategy", hours: 12, rate: 295 },
+                        { role: "Tech - Producer - Landing Page Development", hours: 30, rate: 120 },
+                        { role: "Tech - Producer - Email Development", hours: 25, rate: 120 },
+                        { role: "Tech - Specialist - Automation Setup", hours: 20, rate: 180 },
+                        { role: "Tech - Producer - Testing", hours: 15, rate: 120 },
+                        { role: "Account Management - Account Manager", hours: 8, rate: 180 }
+                    ]
+                },
+                {
+                    id: 23,
+                    name: "Marketing Automation | Automated Appointment Booking Setup",
+                    category: "Implementation & Setup",
+                    pricing: "$8,030", 
+                    hours: 52,
+                    avgRate: "$154",
+                    description: "Automated appointment booking solution with landing page integration for streamlined lead capture",
+                    deliverables: [
+                        "Assessment of Requirements and Tool Selection",
+                        "System Configuration and Setup",
+                        "Integration with Lead Generation System",
+                        "Customization and Branding Implementation",
+                        "Landing Page Design and Development",
+                        "Testing and Quality Assurance",
+                        "Deployment and Post-Launch Monitoring"
+                    ],
+                    phases: ["Requirements Assessment", "System Configuration", "Integration & Customization", "Testing", "Deployment"],
+                    roles: [
+                        { role: "Tech - Head Of - Program Strategy", hours: 4, rate: 365 },
+                        { role: "Tech - Producer - Landing Page Production", hours: 9, rate: 120 },
+                        { role: "Tech - Producer - Services", hours: 9, rate: 120 },
+                        { role: "Tech - Specialist - Integration Services", hours: 3, rate: 190 },
+                        { role: "Tech - Producer - Testing", hours: 9, rate: 120 },
+                        { role: "Account Management - Account Manager", hours: 5, rate: 180 }
+                    ]
+                },
+                {
+                    id: 24,
+                    name: "Marketing Automation | Appointment Automation Workflow Setup",
+                    category: "Campaign Management",
+                    pricing: "$9,700", 
+                    hours: 62,
+                    avgRate: "$156",
+                    description: "Complete appointment automation workflow with reminder emails and follow-up sequences",
+                    deliverables: [
+                        "Email Program Build (Reminder, Non-attendee, Follow-up)",
+                        "Campaign Automation Strategy Development",
+                        "Email and SMS Template Design and Development",
+                        "Workflow and Trigger Configuration",
+                        "List Management and Segmentation Setup",
+                        "Testing and Peer Review",
+                        "Go-Live Support and Monitoring"
+                    ],
+                    phases: ["Strategy Development", "Email/SMS Development", "Workflow Setup", "Testing", "Go-Live"],
+                    roles: [
+                        { role: "Tech - Sr. Consultant - Campaign Strategy", hours: 6, rate: 295 },
+                        { role: "Tech - Producer - Email Production", hours: 9, rate: 120 },
+                        { role: "Tech - Producer - Campaign Build", hours: 9, rate: 120 },
+                        { role: "Tech - Specialist - Integration Services", hours: 3, rate: 190 },
+                        { role: "Tech - Producer - Testing", hours: 9, rate: 120 },
+                        { role: "Account Management - Account Manager", hours: 9, rate: 180 }
+                    ]
+                },
+                {
+                    id: 25,
+                    name: "Marketing Automation | Preference Centre Setup",
+                    category: "Configuration & Setup",
+                    pricing: "$6,960", 
+                    hours: 48,
+                    avgRate: "$145",
+                    description: "Custom preference centre design, development and deployment for subscription management",
+                    deliverables: [
+                        "Preference Centre Planning and Conception",
+                        "Wireframe Design and Layout Creation",
+                        "Subscription Management Configuration",
+                        "Preference Options and Categories Setup",
+                        "Data Field Mapping and Integration",
+                        "Functionality and User Experience Testing",
+                        "Deployment and Go-Live Support"
+                    ],
+                    phases: ["Planning & Design", "Configuration", "Testing", "Deployment"],
+                    roles: [
+                        { role: "Tech - Producer - Landing Page Production", hours: 12, rate: 120 },
+                        { role: "Tech - Producer - Design", hours: 6, rate: 120 },
+                        { role: "Tech - Producer - Development", hours: 12, rate: 120 },
+                        { role: "Tech - Producer - Testing", hours: 12, rate: 120 },                        { role: "Tech - Producer - Deployment", hours: 6, rate: 120 }
+                    ]
+                },
+                {
+                    id: 26,
+                    name: "Marketing Automation | Chatbot Setup & Configuration",
+                    category: "Implementation & Setup",
+                    pricing: "$8,000", 
+                    hours: 56,
+                    avgRate: "$143",
+                    description: "Complete ChatBot implementation with conversational flows, integration, and quality assurance",
+                    deliverables: [
+                        "Discovery & Planning Phase with goals and objectives",
+                        "Technical Setup and Platform Integration",
+                        "Chatbot Logic and Conversational Flow Design",
+                        "Copy Prompts and Customer Interaction Scripting",
+                        "Quality Assurance & Multi-Device Testing",
+                        "Final Review and Go-Live Integration",
+                        "Documentation and Maintenance Guidelines"
+                    ],
+                    phases: ["Discovery & Planning", "Technical Setup", "Quality Assurance & Testing", "Final Delivery"],
+                    roles: [
+                        { role: "Tech - Producer - Chat Bot / Live Chat", hours: 25, rate: 120 },
+                        { role: "Tech - Producer - Copywriting", hours: 5, rate: 120 },
+                        { role: "Tech - Producer - Integration Assistance", hours: 5, rate: 120 },
+                        { role: "Tech - Producer - Testing", hours: 5, rate: 120 },
+                        { role: "Tech - Sr. Consultant - Strategy", hours: 2, rate: 295 },
+                        { role: "Account Management - Account Manager", hours: 8, rate: 180 }
+                    ]
+                },
+                {
+                    id: 27,
+                    name: "Marketing Automation | Triggered Customer Renewal Campaign",
+                    category: "Campaign Management",
+                    pricing: "$8,530", 
+                    hours: 60,
+                    avgRate: "$142",
+                    description: "Automated customer renewal program with triggered campaigns for existing customer retention",
+                    deliverables: [
+                        "Email Program Build (4x Messages for Different Events)",
+                        "Campaign Automation Strategy for Renewal Triggers",
+                        "Email Copy, Design, and Development",
+                        "List Management and Customer Segmentation",
+                        "Automation Workflow Configuration",
+                        "Testing and Peer Review",
+                        "Go-Live Scheduling and Monitoring"
+                    ],
+                    phases: ["Strategy Development", "Email Campaign Build", "Automation Setup", "Testing", "Go-Live"],
+                    roles: [
+                        { role: "Tech - Producer - Email Production", hours: 8, rate: 120 },
+                        { role: "Tech - Producer - Copywriting", hours: 8, rate: 120 },
+                        { role: "Tech - Producer - Design", hours: 4, rate: 120 },
+                        { role: "Tech - Specialist - Campaign Orchestration", hours: 4, rate: 180 },
+                        { role: "Tech - Producer - Testing", hours: 8, rate: 120 },
+                        { role: "Account Management - Account Manager", hours: 8, rate: 180 }
+                    ]
+                },
+                {
+                    id: 28,
+                    name: "Marketing Automation | Single Landing Page Development",
+                    category: "Development & Design",
+                    pricing: "$5,585", 
+                    hours: 40,
+                    avgRate: "$140",
+                    description: "Complete landing page setup with copy, design, development, and integration (max 4 modules)",
+                    deliverables: [
+                        "Landing Page Copy and Content Creation",
+                        "Landing Page Design and Wireframing",
+                        "Landing Page Development and Coding",
+                        "Deployment and Integration Setup",
+                        "Form Review and Integration Testing",
+                        "QA Review and User Acceptance Testing",
+                        "Go-Live and Handover Documentation"
+                    ],
+                    phases: ["Planning & Copy", "Design & Development", "Integration & Testing", "Go-Live"],
+                    roles: [
+                        { role: "Tech - Producer - Landing Page Production", hours: 6, rate: 120 },
+                        { role: "Tech - Producer - Copywriting", hours: 3, rate: 120 },
+                        { role: "Tech - Producer - Design", hours: 6, rate: 120 },
+                        { role: "Tech - Producer - Development", hours: 6, rate: 120 },
+                        { role: "Tech - Specialist - Integration Services", hours: 3, rate: 190 },
+                        { role: "Account Management - Account Manager", hours: 6, rate: 180 }
+                    ]
+                },
+                {
+                    id: 29,
+                    name: "Marketing Automation | Marketo 30-Hour Support Retainer",
+                    category: "Managed Services",
+                    pricing: "$8,060", 
+                    hours: 40,
+                    avgRate: "$202",
+                    description: "2-Month Marketo Support Retainer covering campaign management, technical support, and optimization",
+                    deliverables: [
+                        "User Support and Technical Troubleshooting",
+                        "Campaign Management and Smart Campaign Setup",
+                        "Lead Management and Sales Pipeline Optimization",
+                        "Email Marketing Support and QA Testing",
+                        "Reporting and Analysis with Custom Reports",
+                        "Workflow and Automation Configuration Review",
+                        "List Segmentation and Management Support"
+                    ],                    phases: ["Month 1 Support", "Month 2 Support", "Ongoing Optimization"],
+                    roles: [
+                        { role: "Tech - Producer - Support & Monitoring", hours: 10, rate: 120 },
+                        { role: "Tech - Specialist - Database Management", hours: 10, rate: 180 },
+                        { role: "Tech - Sr. Consultant - Advisory & Consultation", hours: 10, rate: 295 },
+                        { role: "Tech - Head Of - Senior Project Management", hours: 2, rate: 365 },
+                        { role: "Account Management - Account Manager", hours: 6, rate: 180 }
+                    ]
+                },
+                {
+                    id: 30,
+                    name: "Marketing Automation | Salesforce Marketing Cloud Audit",
+                    category: "Audit & Assessment",
+                    pricing: "$10,040", 
+                    hours: 50,
+                    avgRate: "$201",
+                    description: "Comprehensive SFMC audit covering current state, technical infrastructure, and future state recommendations",
+                    deliverables: [
+                        "Current State Analysis and Platform Usage Review",
+                        "Technical Infrastructure and Data Extension Audit",
+                        "Campaign and Content Effectiveness Assessment",
+                        "Process and Workflow Analysis",
+                        "Analytics and Reporting Review",
+                        "Future State Recommendations and Strategic Enhancements",
+                        "Final Documentation and Stakeholder Workshop"
+                    ],
+                    phases: ["Current State Assessment", "Technical Audit", "Performance Analysis", "Future State Planning"],
+                    roles: [
+                        { role: "Tech - Producer - Documentation Setup", hours: 15, rate: 120 },
+                        { role: "Tech - Sr. Consultant - Advisory & Consultation", hours: 15, rate: 295 },
+                        { role: "Tech - Head Of - Customer Experience Strategy", hours: 5, rate: 365 },
+                        { role: "Tech - Producer - Reporting", hours: 6, rate: 120 },
+                        { role: "Account Management - Account Manager", hours: 4, rate: 180 }
+                    ]
+                },
+                {
+                    id: 31,
+                    name: "B2B/CRM/ABM | 6-Month Advisory & Consultation",
+                    category: "Advisory & Consultation",
+                    pricing: "$44,650", 
+                    hours: 200,
+                    avgRate: "$223",
+                    description: "Comprehensive B2B, CRM, and Account-Based Marketing advisory retainer with strategic planning and implementation support",
+                    deliverables: [
+                        "Initial Discovery Meetings and Requirements Assessment",
+                        "Current Systems and Processes Evaluation",
+                        "CRM Customization and Configuration Support",
+                        "Data Strategy and ABM Framework Development",
+                        "Ongoing Support and Consultation Services",
+                        "Strategic Planning and Roadmap Development",
+                        "Performance Monitoring and Reporting Support"
+                    ],
+                    phases: ["Discovery & Assessment", "Strategic Planning", "Implementation Support", "Ongoing Optimization"],
+                    roles: [
+                        { role: "Tech - Head Of - Customer Experience Strategy", hours: 30, rate: 365 },
+                        { role: "Tech - Sr. Consultant - Advisory & Consultation", hours: 20, rate: 295 },
+                        { role: "Tech - Sr. Architect - Data Strategy", hours: 20, rate: 365 },
+                        { role: "Tech - Specialist - Database Management", hours: 20, rate: 180 },
+                        { role: "Tech - Specialist - Integration Services", hours: 20, rate: 190 },
+                        { role: "Account Management - Account Manager", hours: 30, rate: 180 }
+                    ]
+                },
+                {
+                    id: 32,
+                    name: "Marketing Automation | HubSpot Full Implementation (All Hubs)",
+                    category: "Implementation & Setup",
+                    pricing: "$29,750", 
+                    hours: 150,
+                    avgRate: "$198",
+                    description: "Complete HubSpot implementation including Marketing Hub, Sales Hub, and Service Hub with training and support",
+                    deliverables: [
+                        "Initial Account Customization and User Setup",
+                        "Marketing Hub Implementation with Tracking and Domains",
+                        "Sales Hub Implementation with Pipelines and Workflows",
+                        "Service Hub Implementation with Inbox and Ticket Management",
+                        "Reporting and Dashboards (4x custom reports max)",
+                        "Go-Live, Deployment, and 2x Training Sessions",
+                        "Resource Handover and Documentation"
+                    ],
+                    phases: ["Account Setup", "Marketing Hub", "Sales Hub", "Service Hub", "Reporting", "Training & Go-Live"],
+                    roles: [
+                        { role: "Tech - Producer - Admin Configuration", hours: 30, rate: 120 },
+                        { role: "Tech - Head Of - System Setup", hours: 20, rate: 365 },
+                        { role: "Tech - Sr. Consultant - Advisory & Consultation", hours: 10, rate: 295 },
+                        { role: "Tech - Specialist - Database Management", hours: 10, rate: 180 },
+                        { role: "Tech - Specialist - Workflows", hours: 10, rate: 180 },
+                        { role: "Tech - Specialist - Integration Services", hours: 10, rate: 190 },
+                        { role: "Account Management - Account Manager", hours: 15, rate: 180 }
+                    ]
+                }
+            ];
+            
+            console.log('Real services loaded from KB:', services);
+            renderServiceVisualization();
+        }        // --- Service Visualization ---
+        function renderServiceVisualization() {
+            if (!services || services.length === 0) return;
+            
+            // Use the new view system based on currentView
+            const container = document.getElementById('knowledge-visualization');
+            
+            switch(currentView) {
+                case 'tree':
+                    renderTreeView(container);
+                    break;
+                case 'network':
+                    renderNetworkView(container);
+                    break;
+                case 'categories':
+                    renderCategoryView(container);
+                    break;
+                default:
+                    renderGridView(container);
+            }
+        }
+        
+        function renderGridView(container) {
+            // Clear existing content
+            container.innerHTML = '';
+            
+            // Create service grid layout
+            const serviceGrid = document.createElement('div');
+            serviceGrid.className = 'grid grid-cols-1 md:grid-cols-2 gap-4 p-4';
+              services.forEach(service => {
+                const serviceCard = document.createElement('div');
+                  // Determine category class for color coding
+                let categoryClass = 'category-marketing'; // default
+                if (service.category.includes('Audit')) categoryClass = 'category-audit';
+                else if (service.category.includes('Strategy')) categoryClass = 'category-strategy';
+                else if (service.category.includes('Managed')) categoryClass = 'category-managed';
+                else if (service.category.includes('Advisory')) categoryClass = 'category-advisory';
+                else if (service.category.includes('Configuration') || service.category.includes('Setup')) categoryClass = 'category-configuration';
+                else if (service.category.includes('Implementation')) categoryClass = 'category-implementation';
+                else if (service.category.includes('Project Management')) categoryClass = 'category-project';
+                else if (service.category.includes('Bundles')) categoryClass = 'category-bundles';
+                else if (service.category.includes('Custom')) categoryClass = 'category-custom';
+                
+                serviceCard.className = `service-node ${categoryClass} bg-white border-2 border-gray-200 rounded-lg p-4 hover:border-blue-500 cursor-pointer transition-all`;
+                serviceCard.onclick = () => showServiceDetails(service);
+                
+                serviceCard.innerHTML = `
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="font-semibold text-sm text-gray-900 leading-tight pr-2">${service.name}</h3>
+                        <div class="text-right flex-shrink-0">
+                            <div class="text-lg font-bold text-blue-600">${service.pricing}</div>
+                            <div class="text-xs text-gray-500">${service.hours} hrs</div>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <span class="inline-block bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs font-medium">${service.category}</span>
+                    </div>
+                    <div class="text-xs text-gray-600 line-clamp-2">
+                        ${service.description}
+                    </div>
+                    <div class="mt-3 flex justify-between items-center text-xs text-gray-500">
+                        <span>${service.deliverables.length} deliverables</span>
+                        <span>Avg: ${service.avgRate}</span>
+                    </div>
+                `;
+                
+                serviceGrid.appendChild(serviceCard);
+            });
+            
+            container.appendChild(serviceGrid);
+        }        function showServiceDetailsById(serviceId) {
+            const service = services.find(s => s.id == serviceId);
+            if (service) {
+                showServiceDetails(service);
+            }
+        }
+
+          function showServiceDetails(service) {
+            const detailsPanel = document.getElementById('service-details');
+            const titleElement = document.getElementById('service-title');
+            const infoElement = document.getElementById('service-info');
+            
+            titleElement.textContent = service.name;
+            
+            infoElement.innerHTML = `
+                <div class="glass-effect rounded-xl shadow-lg card-elevated">
+                    <!-- Header Section -->
+                    <div class="primary-gradient p-6 rounded-t-xl text-white">
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                            <div class="bg-white bg-opacity-20 backdrop-blur rounded-lg p-3">
+                                <div class="text-2xl font-bold text-white">${service.pricing}</div>
+                                <div class="text-xs text-green-200">Investment</div>
+                            </div>
+                            <div class="bg-white bg-opacity-20 backdrop-blur rounded-lg p-3">
+                                <div class="text-2xl font-bold text-white">${service.hours}</div>
+                                <div class="text-xs text-green-200">Hours</div>
+                            </div>
+                            <div class="bg-white bg-opacity-20 backdrop-blur rounded-lg p-3">
+                                <div class="text-2xl font-bold text-white">${service.avgRate}</div>
+                                <div class="text-xs text-green-200">Avg Rate</div>
+                            </div>
+                            <div class="bg-white bg-opacity-20 backdrop-blur rounded-lg p-3">
+                                <div class="text-2xl font-bold text-white">${service.category}</div>
+                                <div class="text-xs text-green-200">Category</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Content Section -->
+                    <div class="p-6 space-y-6">
+                        <!-- Description -->
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-900 mb-3 flex items-center">
+                                <span class="w-3 h-3 primary-gradient rounded-full mr-3"></span>
+                                Service Overview
+                            </h4>
+                            <p class="text-gray-700 leading-relaxed bg-gradient-to-r from-gray-50 to-white p-4 rounded-lg border border-gray-100">
+                                ${service.description}
+                            </p>
+                        </div>
+                        
+                        <!-- Key Deliverables -->
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-900 mb-3 flex items-center">
+                                <span class="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+                                Key Deliverables (${service.deliverables.length})
+                            </h4>
+                            <div class="grid gap-3">
+                                ${service.deliverables.map((item, index) => `
+                                    <div class="flex items-start space-x-3 p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-100">
+                                        <span class="flex-shrink-0 w-6 h-6 primary-gradient text-white rounded-full text-xs flex items-center justify-center font-medium">
+                                            ${index + 1}
+                                        </span>
+                                        <span class="text-gray-700">${item}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                        <!-- Project Phases -->
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-900 mb-3 flex items-center">
+                                <span class="w-3 h-3 bg-purple-500 rounded-full mr-3"></span>
+                                Project Phases
+                            </h4>
+                            <div class="flex flex-wrap gap-2">
+                                ${service.phases.map((phase, index) => `
+                                    <span class="bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800 px-4 py-2 rounded-full text-sm font-medium border border-purple-200">
+                                        ${index + 1}. ${phase}
+                                    </span>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                        <!-- Team Structure -->
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-900 mb-3 flex items-center">
+                                <span class="w-3 h-3 bg-orange-500 rounded-full mr-3"></span>
+                                Team Structure & Pricing
+                            </h4>
+                            <div class="bg-gradient-to-r from-gray-50 to-white rounded-lg overflow-hidden border border-gray-200">
+                                <div class="grid grid-cols-4 primary-gradient text-white p-3 text-sm font-medium">
+                                    <div>Role</div>
+                                    <div class="text-center">Hours</div>
+                                    <div class="text-center">Rate</div>
+                                    <div class="text-center">Total</div>
+                                </div>
+                                ${service.roles.map(role => `
+                                    <div class="grid grid-cols-4 p-3 border-b border-gray-100 text-sm hover:bg-gradient-to-r hover:from-gray-50 hover:to-white transition-colors">
+                                        <div class="font-medium text-gray-900">${role.role}</div>
+                                        <div class="text-center text-gray-600">${role.hours}h</div>
+                                        <div class="text-center text-gray-600">$${role.rate}</div>
+                                        <div class="text-center font-semibold text-green-600">$${(role.hours * role.rate).toLocaleString()}</div>
+                                    </div>
+                                `).join('')}
+                                <div class="primary-gradient text-white p-3">
+                                    <div class="grid grid-cols-4 text-sm font-bold">
+                                        <div>Total Project</div>
+                                        <div class="text-center">${service.hours}h</div>
+                                        <div class="text-center">${service.avgRate} avg</div>
+                                        <div class="text-center">${service.pricing}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="flex flex-wrap gap-3 pt-4 border-t border-gray-200">
+                            <button onclick="addServiceToQuote('${service.id}')" 
+                                    class="btn-primary px-4 py-2 rounded-lg hover:scale-105 transition-transform font-medium">
+                                📋 Add to Quote
+                            </button>
+                            <button onclick="generateSOWForService('${service.id}')" 
+                                    class="btn-secondary px-4 py-2 rounded-lg hover:scale-105 transition-transform font-medium">
+                                📄 Generate SOW
+                            </button>
+                            <button onclick="viewSimilarServices('${service.category}')" 
+                                    class="btn-secondary px-4 py-2 rounded-lg hover:scale-105 transition-transform font-medium">
+                                🔍 Similar Services
+                            </button>
+                            <button onclick="closeServiceDetails()" 
+                                    class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors font-medium">
+                                ✕ Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;            
+            detailsPanel.classList.remove('hidden');
+            detailsPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        
+        function closeServiceDetails() {
+            document.getElementById('service-details').classList.add('hidden');
+        }
+        
+        function addServiceToQuote(serviceId) {
+            showToast('📋 Service added to quote!', 'success');
+        }
+        
+        function generateSOWForService(serviceId) {
+            const service = services.find(s => s.id == serviceId);
+            if (service) {
+                window.open(`enhanced-sow-demo.html?serviceId=${serviceId}&serviceName=${encodeURIComponent(service.name)}`, '_blank');
+            }
+        }
+        
+        function viewSimilarServices(category) {
+            const similarServices = services.filter(s => s.category === category);
+            showToast(`🔍 Found ${similarServices.length} services in ${category}`, 'info');
+        }
+        
+        // --- AnythingLLM API Helper ---
+        async function callAnythingLLM(message) {
+            const response = await fetch(`${ANYTHINGLLM_CONFIG.baseUrl}/api/v1/workspace/${ANYTHINGLLM_CONFIG.workspace}/chat`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${ANYTHINGLLM_CONFIG.apiKey}`,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: message,
+                    mode: 'chat'
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            return data.textResponse || data.message || 'No response received';
+        }
+    </script>
+</body>
+</html>
