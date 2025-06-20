@@ -777,7 +777,18 @@
                                 <p class="text-xs text-teal-200/70 mt-2">AI will extract company profile, industry insights, and business intelligence</p>
                             </div>
                             
-
+                            <div class="bg-white/5 rounded-xl p-4 border border-white/10 backdrop-blur-sm">
+                                <label class="block text-sm font-medium text-green-300 mb-2 uppercase tracking-wide flex items-center">
+                                    📄 Additional Company Resources
+                                    <span class="ml-2 text-xs bg-green-500/20 text-green-200 px-2 py-1 rounded-full">Optional</span>
+                                </label>
+                                <div class="space-y-2">
+                                    <input type="url" id="company-linkedin" class="w-full px-3 py-2 rounded-lg bg-black/20 text-white border border-green-500/30 focus:border-green-400 focus:ring-2 focus:ring-green-400/20 text-xs placeholder-gray-400" placeholder="LinkedIn company page (optional)">
+                                    <input type="url" id="company-annual-report" class="w-full px-3 py-2 rounded-lg bg-black/20 text-white border border-green-500/30 focus:border-green-400 focus:ring-2 focus:ring-green-400/20 text-xs placeholder-gray-400" placeholder="Annual report or investor relations (optional)">
+                                    <input type="url" id="company-news" class="w-full px-3 py-2 rounded-lg bg-black/20 text-white border border-green-500/30 focus:border-green-400 focus:ring-2 focus:ring-green-400/20 text-xs placeholder-gray-400" placeholder="Recent news or press releases (optional)">
+                                </div>
+                                <p class="text-xs text-green-200/70 mt-2">Additional sources for deeper company analysis and context</p>
+                            </div>
                             
                             <div class="pt-3">
                                 <button id="ai-autofill-client" type="button" class="w-full primary-gradient hover:from-teal-600 hover:via-teal-700 hover:to-green-600 text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 duration-300 border border-white/20">
@@ -787,7 +798,50 @@
                                 </button>
                             </div>
                         </div>
-
+                        
+                        <!-- AI Processing Animation (Hidden by default) -->
+                        <div id="ai-processing-animation" class="hidden mt-4 bg-gradient-to-br from-black/30 to-blue-900/30 rounded-xl p-3 border border-cyan-500/30 backdrop-blur-sm">
+                            <div class="text-center mb-3">
+                                <div class="inline-flex items-center space-x-2 bg-cyan-500/20 px-3 py-1 rounded-full border border-cyan-400/30">
+                                    <div class="w-2 h-2 bg-cyan-400 rounded-full animate-ping"></div>
+                                    <span class="text-cyan-300 text-xs font-medium">AI PROCESSING</span>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-2">
+                                        <div class="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
+                                        <span class="text-purple-200 text-xs typing-animation" data-text="Company Research">Company Research</span>
+                                    </div>
+                                    <div class="w-12 h-1 bg-gray-700 rounded-full overflow-hidden">
+                                        <div class="h-full bg-gradient-to-r from-purple-500 to-pink-400 rounded-full animate-pulse"></div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-2">
+                                        <div class="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                                        <span class="text-blue-200 text-xs typing-animation" data-text="Market Analysis">Market Analysis</span>
+                                    </div>
+                                    <div class="w-12 h-1 bg-gray-700 rounded-full overflow-hidden">
+                                        <div class="h-full bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full animate-pulse"></div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-2">
+                                        <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                                        <span class="text-green-200 text-xs typing-animation" data-text="Intelligence Synthesis">Intelligence Synthesis</span>
+                                    </div>
+                                    <div class="w-12 h-1 bg-gray-700 rounded-full overflow-hidden">
+                                        <div class="h-full bg-gradient-to-r from-green-500 to-emerald-400 rounded-full animate-pulse"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-3 flex justify-center">
+                                <div class="w-8 h-8 border-2 border-cyan-400/30 border-t-cyan-400 rounded-full animate-spin"></div>
+                            </div>
+                        </div>
                     </div>
                     
                     <!-- AI Status Message -->
@@ -816,136 +870,136 @@
                     
                     <!-- Tab Content -->
                     <div class="flex-grow overflow-y-auto p-3">
-                        <!-- Profile Analysis Tab (Visible by default) -->
-                        <div id="profile-analysis-content" class="client-tab-content">
-                            <div id="profile-loading" class="text-center py-16 text-gray-500">
-                                <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-8 max-w-md mx-auto">
-                                    <div class="mb-4">
-                                        <div class="w-16 h-16 bg-gray-100 rounded-lg mx-auto flex items-center justify-center mb-4">
-                                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                            </svg>
-                                        </div>
-                                        <h3 class="text-lg font-medium text-gray-900 mb-2">Ready for Analysis</h3>
-                                        <p class="text-sm text-gray-600">Enter a company website URL and click "AI ANALYZE & EXTRACT" to begin intelligent business analysis.</p>
-                                    </div>
-                                    <div class="text-xs text-gray-400">
-                                        AI will extract company information, analyze market position, and recommend relevant services.
-                                    </div>
-                                </div>
-                            </div>
-                            <div id="profile-content" class="hidden">
-                                <div class="flex items-start mb-6">
-                                    <div class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mr-4 overflow-hidden" id="profile-avatar">
-                                        <span class="text-2xl">👤</span>
-                                    </div>
-                                    <div>
-                                        <h3 class="text-xl font-bold" id="profile-name">-</h3>
-                                        <p class="text-gray-600" id="profile-headline">-</p>
-                                        <div class="mt-2 flex items-center text-sm text-gray-500">
-                                            <span class="mr-3" id="profile-location">-</span>
-                                            <span id="profile-connections">-</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                                    <div class="bg-blue-50 rounded-lg p-4 border border-blue-100">
-                                        <h4 class="font-medium text-gray-900 mb-2">Experience</h4>
-                                        <div id="profile-experience" class="text-sm"></div>
-                                    </div>
-                                    <div class="bg-purple-50 rounded-lg p-4 border border-purple-100">
-                                        <h4 class="font-medium text-gray-900 mb-2">Skills</h4>
-                                        <div id="profile-skills" class="text-sm"></div>
-                                    </div>
-                                    <div class="bg-green-50 rounded-lg p-4 border border-green-100">
-                                        <h4 class="font-medium text-gray-900 mb-2">Education</h4>
-                                        <div id="profile-education" class="text-sm"></div>
-                                    </div>
-                                </div>
-                                
-                                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                                    <h4 class="font-medium text-gray-900 mb-2">AI Insights</h4>
-                                    <div id="profile-insights" class="text-sm"></div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Company Analysis Tab (Hidden by default) -->
-                        <div id="company-analysis-content" class="client-tab-content hidden">
+                        <!-- Company Analysis Tab (Visible by default) -->
+                        <div id="company-analysis-content" class="client-tab-content">
                             <div id="company-loading" class="text-center py-16 text-gray-500">
-                                <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-8 max-w-md mx-auto">
-                                    <div class="mb-4">
-                                        <div class="w-16 h-16 bg-gray-100 rounded-lg mx-auto flex items-center justify-center mb-4">
-                                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                                            </svg>
-                                        </div>
-                                        <h3 class="text-lg font-medium text-gray-900 mb-2">Ready for Analysis</h3>
-                                        <p class="text-sm text-gray-600">Enter a company website URL and click "AI ANALYZE & EXTRACT" to begin intelligent business analysis.</p>
-                                    </div>
-                                    <div class="text-xs text-gray-400">
-                                        AI will extract company information, analyze market position, and recommend relevant services.
-                                    </div>
-                                </div>
+                                <p class="text-lg">Enter company website and click "AI Autofill & Analyze" to begin</p>
                             </div>
                             <div id="company-content" class="hidden">
-                                <div class="flex items-start mb-6">
-                                    <div class="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center mr-4 overflow-hidden" id="company-logo">
-                                        <span class="text-2xl">🏢</span>
+                                <!-- Company Header -->
+                                <div class="flex items-start mb-6 bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-4 border border-gray-200">
+                                    <div class="w-20 h-20 rounded-xl bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center mr-4 overflow-hidden shadow-md" id="company-logo">
+                                        <span class="text-3xl">🏢</span>
                                     </div>
-                                    <div>
-                                        <h3 class="text-xl font-bold" id="company-name">-</h3>
-                                        <p class="text-gray-600" id="company-industry">-</p>
-                                        <div class="mt-2 flex items-center text-sm text-gray-500">
-                                            <span class="mr-3" id="company-size">-</span>
-                                            <span class="mr-3" id="company-founded">-</span>
-                                            <span id="company-location">-</span>
+                                    <div class="flex-grow">
+                                        <h3 class="text-2xl font-bold text-gray-900" id="company-name">-</h3>
+                                        <p class="text-lg text-blue-600 font-medium" id="company-industry">-</p>
+                                        <div class="mt-3 flex items-center flex-wrap gap-3 text-sm text-gray-600">
+                                            <span class="flex items-center bg-white px-3 py-1 rounded-full shadow-sm border">
+                                                <span class="mr-1">👥</span>
+                                                <span id="company-size">-</span>
+                                            </span>
+                                            <span class="flex items-center bg-white px-3 py-1 rounded-full shadow-sm border">
+                                                <span class="mr-1">📅</span>
+                                                <span>Founded <span id="company-founded">-</span></span>
+                                            </span>
+                                            <span class="flex items-center bg-white px-3 py-1 rounded-full shadow-sm border">
+                                                <span class="mr-1">🌍</span>
+                                                <span id="company-location">-</span>
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
                                 
-                                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
-                                    <div class="bg-indigo-50 rounded-lg p-3 border border-indigo-100">
-                                        <h4 class="font-medium text-gray-900 mb-1 text-sm">🎯 Business Model</h4>
-                                        <div id="company-overview" class="text-xs text-gray-700"></div>
-                                    </div>
-                                    <div class="bg-blue-50 rounded-lg p-3 border border-blue-100">
-                                        <h4 class="font-medium text-gray-900 mb-1 text-sm">🏆 Market Position</h4>
-                                        <div id="company-market" class="text-xs text-gray-700"></div>
-                                    </div>
-                                    <div class="bg-purple-50 rounded-lg p-3 border border-purple-100">
-                                        <h4 class="font-medium text-gray-900 mb-1 text-sm">👥 Target Customers</h4>
-                                        <div id="company-target-customers" class="text-xs text-gray-700">Analysis in progress...</div>
-                                    </div>
-                                    <div class="bg-teal-50 rounded-lg p-3 border border-teal-100">
-                                        <h4 class="font-medium text-gray-900 mb-1 text-sm">💡 Value Proposition</h4>
-                                        <div id="company-value-proposition" class="text-xs text-gray-700">Analysis in progress...</div>
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
-                                    <div class="bg-orange-50 rounded-lg p-3 border border-orange-100">
-                                        <h4 class="font-medium text-gray-900 mb-1 text-sm">🌐 Digital Presence</h4>
-                                        <div id="company-digital-presence" class="text-xs text-gray-700">Analysis in progress...</div>
-                                    </div>
-                                    <div class="bg-green-50 rounded-lg p-3 border border-green-100">
-                                        <h4 class="font-medium text-gray-900 mb-1 text-sm">📈 Growth Indicators</h4>
-                                        <div id="company-growth" class="text-xs text-gray-700">Analysis in progress...</div>
-                                    </div>
-                                    <div class="bg-gray-50 rounded-lg p-3 border border-gray-100">
-                                        <h4 class="font-medium text-gray-900 mb-1 text-sm">⚙️ Technology Stack</h4>
-                                        <div id="company-technology" class="text-xs text-gray-700">Analysis in progress...</div>
-                                    </div>
-                                    <div class="bg-red-50 rounded-lg p-3 border border-red-100">
-                                        <h4 class="font-medium text-gray-900 mb-1 text-sm">⚠️ Challenges</h4>
-                                        <div id="company-challenges" class="text-xs text-gray-700"></div>
+                                <!-- Company Overview Section -->
+                                <div class="mb-6">
+                                    <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6 border border-indigo-100 shadow-sm">
+                                        <h4 class="text-xl font-bold text-gray-900 mb-3 flex items-center">
+                                            <span class="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center mr-3">
+                                                <span class="text-white text-sm">📋</span>
+                                            </span>
+                                            Company Overview
+                                        </h4>
+                                        <div id="company-overview" class="text-sm text-gray-700 leading-relaxed"></div>
                                     </div>
                                 </div>
                                 
-                                <div class="bg-emerald-50 rounded-lg p-3 border border-emerald-100">
-                                    <h4 class="font-medium text-gray-900 mb-1 text-sm">🚀 Market Opportunities</h4>
-                                    <div id="company-opportunities" class="text-xs text-gray-700"></div>
+                                <!-- Key Metrics Grid -->
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                                    <div class="bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl p-4 border border-emerald-100 shadow-sm">
+                                        <h4 class="font-bold text-gray-900 mb-2 flex items-center">
+                                            <span class="w-6 h-6 bg-emerald-500 rounded flex items-center justify-center mr-2">
+                                                <span class="text-white text-xs">💼</span>
+                                            </span>
+                                            Business Model
+                                        </h4>
+                                        <div id="company-business-model" class="text-sm text-gray-700"></div>
+                                    </div>
+                                    <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-4 border border-blue-100 shadow-sm">
+                                        <h4 class="font-bold text-gray-900 mb-2 flex items-center">
+                                            <span class="w-6 h-6 bg-blue-500 rounded flex items-center justify-center mr-2">
+                                                <span class="text-white text-xs">🎯</span>
+                                            </span>
+                                            Target Market
+                                        </h4>
+                                        <div id="company-target-market" class="text-sm text-gray-700"></div>
+                                    </div>
+                                    <div class="bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl p-4 border border-orange-100 shadow-sm">
+                                        <h4 class="font-bold text-gray-900 mb-2 flex items-center">
+                                            <span class="w-6 h-6 bg-orange-500 rounded flex items-center justify-center mr-2">
+                                                <span class="text-white text-xs">💰</span>
+                                            </span>
+                                            Revenue Model
+                                        </h4>
+                                        <div id="company-revenue-model" class="text-sm text-gray-700"></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Market Analysis & Competitive Landscape -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                    <div class="bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl p-4 border border-yellow-100 shadow-sm">
+                                        <h4 class="font-bold text-gray-900 mb-3 flex items-center">
+                                            <span class="w-6 h-6 bg-yellow-500 rounded flex items-center justify-center mr-2">
+                                                <span class="text-white text-xs">📈</span>
+                                            </span>
+                                            Market Position & Trends
+                                        </h4>
+                                        <div id="company-market" class="text-sm text-gray-700"></div>
+                                    </div>
+                                    <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-4 border border-purple-100 shadow-sm">
+                                        <h4 class="font-bold text-gray-900 mb-3 flex items-center">
+                                            <span class="w-6 h-6 bg-purple-500 rounded flex items-center justify-center mr-2">
+                                                <span class="text-white text-xs">⚔️</span>
+                                            </span>
+                                            Competitive Landscape
+                                        </h4>
+                                        <div id="company-competition" class="text-sm text-gray-700"></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Technology & Innovation -->
+                                <div class="mb-6">
+                                    <div class="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl p-4 border border-teal-100 shadow-sm">
+                                        <h4 class="font-bold text-gray-900 mb-3 flex items-center">
+                                            <span class="w-6 h-6 bg-teal-500 rounded flex items-center justify-center mr-2">
+                                                <span class="text-white text-xs">🚀</span>
+                                            </span>
+                                            Technology Stack & Innovation
+                                        </h4>
+                                        <div id="company-technology" class="text-sm text-gray-700"></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Challenges & Opportunities -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="bg-gradient-to-r from-red-50 to-rose-50 rounded-xl p-4 border border-red-100 shadow-sm">
+                                        <h4 class="font-bold text-gray-900 mb-3 flex items-center">
+                                            <span class="w-6 h-6 bg-red-500 rounded flex items-center justify-center mr-2">
+                                                <span class="text-white text-xs">⚠️</span>
+                                            </span>
+                                            Key Challenges
+                                        </h4>
+                                        <div id="company-challenges" class="text-sm text-gray-700"></div>
+                                    </div>
+                                    <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-100 shadow-sm">
+                                        <h4 class="font-bold text-gray-900 mb-3 flex items-center">
+                                            <span class="w-6 h-6 bg-green-500 rounded flex items-center justify-center mr-2">
+                                                <span class="text-white text-xs">💡</span>
+                                            </span>
+                                            Growth Opportunities
+                                        </h4>
+                                        <div id="company-opportunities" class="text-sm text-gray-700"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -966,17 +1020,6 @@
                                 <div id="recommended-services" class="space-y-4">
                                     <!-- Service recommendations will be inserted here -->
                                 </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Market Analysis Tab (Hidden by default) -->
-                        <div id="market-analysis-content" class="client-tab-content hidden">
-                            <div id="market-loading" class="text-center py-16 text-gray-500">
-                                <p class="text-lg">Market insights will be available here</p>
-                            </div>
-                            <div id="market-content" class="hidden">
-                                <h3 class="text-lg font-bold mb-4">Market Analysis for <span id="market-client-name">this client</span></h3>
-                                <p class="text-gray-500 text-center py-8">Market analysis functionality coming soon...</p>
                             </div>
                         </div>
                         
@@ -1186,7 +1229,10 @@
                                 <label class="block text-xs font-medium text-gray-700 mb-1">Phone</label>
                                 <input type="tel" id="client-phone" class="form-input w-full px-2 py-1.5 rounded text-sm" placeholder="+1 (555) 123-4567">
                             </div>
-
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">LinkedIn URL</label>
+                                <input type="url" id="client-linkedin" class="form-input w-full px-2 py-1.5 rounded text-sm" placeholder="https://linkedin.com/in/username">
+                            </div>
                             <div>
                                 <label class="block text-xs font-medium text-gray-700 mb-1">Company Website</label>
                                 <input type="url" id="client-website" class="form-input w-full px-2 py-1.5 rounded text-sm" placeholder="https://company.com">
@@ -2034,13 +2080,12 @@
         * 
         * For this application to work properly with AnythingLLM, ensure:
         * 1. Your workspace has AI Agents enabled
-        * 2. The Web Search tool is enabled for the agent (for LinkedIn profile research)
-        * 3. The Web Scraping tool is enabled for the agent (for company websites)
-        * 4. Your LLM model supports tool calling (recommended: GPT-4, Claude, or Llama 70B+)
-        * 5. The workspace has appropriate permissions for the API key
+        * 2. The Web Scraping tool is enabled for the agent (for company websites)
+        * 3. Your LLM model supports tool calling (recommended: GPT-4, Claude, or Llama 70B+)
+        * 4. The workspace has appropriate permissions for the API key
         * 
-        * LinkedIn profiles are researched via web search to find publicly available information,
-        * while company websites are directly scraped for business information.
+        * Company websites are directly scraped for comprehensive business intelligence
+        * including company profile, market analysis, and competitive insights.
         * 
         * If agents are not available, the application will fall back to demo mode.
         */
@@ -2055,85 +2100,9 @@
                 return;
             }
             
-            // Show professional processing animation in both tabs
-            document.getElementById('profile-loading').innerHTML = `
-                <div class="py-6">
-                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
-                        <div class="border-b border-gray-100 px-6 py-4">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-3 h-3 bg-blue-600 rounded-full animate-pulse"></div>
-                                <h3 class="text-lg font-semibold text-gray-900">AI Analysis in Progress</h3>
-                                <div class="text-sm text-gray-500">Processing company data...</div>
-                            </div>
-                        </div>
-                        <div class="p-6">
-                            <div class="space-y-6">
-                                <div class="flex items-start space-x-4">
-                                    <div class="flex-shrink-0 mt-1">
-                                        <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                                            <div class="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                                        </div>
-                                    </div>
-                                    <div class="flex-1">
-                                        <div class="bg-gray-50 rounded-lg p-4 border border-gray-100">
-                                            <h4 class="font-medium text-gray-900 mb-2">Website Content Analysis</h4>
-                                            <p class="text-sm text-gray-600 mb-3">Extracting business information and company overview</p>
-                                            <div class="w-full bg-gray-200 rounded-full h-2">
-                                                <div class="bg-blue-600 h-2 rounded-full animate-pulse" style="width: 85%"></div>
-                                            </div>
-                                            <div class="text-xs text-gray-500 mt-1">Analyzing page structure and content...</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="flex items-start space-x-4">
-                                    <div class="flex-shrink-0 mt-1">
-                                        <div class="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
-                                            <div class="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                                        </div>
-                                    </div>
-                                    <div class="flex-1">
-                                        <div class="bg-gray-50 rounded-lg p-4 border border-gray-100">
-                                            <h4 class="font-medium text-gray-900 mb-2">Business Intelligence Processing</h4>
-                                            <p class="text-sm text-gray-600 mb-3">Categorizing industry and analyzing market position</p>
-                                            <div class="w-full bg-gray-200 rounded-full h-2">
-                                                <div class="bg-gray-600 h-2 rounded-full animate-pulse" style="width: 65%"></div>
-                                            </div>
-                                            <div class="text-xs text-gray-500 mt-1">Processing industry classification...</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="flex items-start space-x-4">
-                                    <div class="flex-shrink-0 mt-1">
-                                        <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                                            <div class="w-2 h-2 bg-white rounded-full"></div>
-                                        </div>
-                                    </div>
-                                    <div class="flex-1">
-                                        <div class="bg-gray-50 rounded-lg p-4 border border-gray-100">
-                                            <h4 class="font-medium text-gray-700 mb-2">Service Recommendation Engine</h4>
-                                            <p class="text-sm text-gray-500 mb-3">Matching business needs with available services</p>
-                                            <div class="w-full bg-gray-200 rounded-full h-2">
-                                                <div class="bg-gray-300 h-2 rounded-full" style="width: 25%"></div>
-                                            </div>
-                                            <div class="text-xs text-gray-400 mt-1">Queued for processing...</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="mt-6 pt-4 border-t border-gray-100">
-                                <div class="flex items-center justify-between text-sm">
-                                    <span class="text-gray-600">Overall Progress</span>
-                                    <span class="font-medium text-gray-900">Processing... 2 of 4 steps</span>
-                                </div>
-                                <div class="mt-2 w-full bg-gray-200 rounded-full h-2">
-                                    <div class="bg-blue-600 h-2 rounded-full animate-pulse" style="width: 50%"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.getElementById('company-loading').innerHTML = document.getElementById('profile-loading').innerHTML;
+            // Show processing animation
+            const processingAnimation = document.getElementById('ai-processing-animation');
+            processingAnimation.classList.remove('hidden');
             
             // Show status indicator
             const statusEl = document.getElementById('ai-autofill-status');
@@ -2151,9 +2120,218 @@
                 // Use existing main workspace for scraping
                 const workspaceSlug = ANYTHINGLLM_CONFIG.workspace;
                 
-                statusEl.innerHTML = '<span class="animate-pulse">⏳ Analyzing company website...</span>';
+                statusEl.innerHTML = '<span class="animate-pulse">⏳ Analyzing company website and gathering intelligence...</span>';
                 
                 // Process Website URL
+                let companyData = null;
+                
+                // Helper function to parse Company agent response
+                function parseCompanyResponse(responseText) {
+                    const data = {};
+                    const lines = responseText.split('\n').filter(line => line.trim() !== '');
+
+                    lines.forEach(line => {
+                        if (line.startsWith('**Company Name:**')) {
+                            data.name = line.replace('**Company Name:**', '').trim();
+                        } else if (line.startsWith('**Industry:**')) {
+                            data.industry = line.replace('**Industry:**', '').trim();
+                        } else if (line.startsWith('**Size:**')) {
+                            data.size = line.replace('**Size:**', '').trim();
+                        } else if (line.startsWith('**Founded:**')) {
+                            data.founded = line.replace('**Founded:**', '').trim();
+                        } else if (line.startsWith('**Location:**')) {
+                            data.location = line.replace('**Location:**', '').trim();
+                        } else if (line.startsWith('**Overview:**')) {
+                            data.overview = line.replace('**Overview:**', '').trim();
+                        } else if (line.startsWith('**Business Model:**')) {
+                            data.businessModel = line.replace('**Business Model:**', '').trim();
+                        } else if (line.startsWith('**Target Market:**')) {
+                            data.targetMarket = line.replace('**Target Market:**', '').trim();
+                        } else if (line.startsWith('**Revenue Model:**')) {
+                            data.revenueModel = line.replace('**Revenue Model:**', '').trim();
+                        } else if (line.startsWith('**Market:**')) {
+                            data.market = line.replace('**Market:**', '').trim();
+                        } else if (line.startsWith('**Competition:**')) {
+                            data.competition = line.replace('**Competition:**', '').trim();
+                        } else if (line.startsWith('**Technology:**')) {
+                            data.technology = line.replace('**Technology:**', '').trim();
+                        } else if (line.startsWith('**Challenges:**')) {
+                            data.challenges = line.replace('**Challenges:**', '').trim();
+                        } else if (line.startsWith('**Opportunities:**')) {
+                            data.opportunities = line.replace('**Opportunities:**', '').trim();
+                        }
+                    });
+                    return data;
+                }
+                
+                try {
+                    statusEl.innerHTML = '<span class="animate-pulse">⏳ Analyzing company website...</span>';
+                        
+                        const linkedinResponse = await fetch(`${ANYTHINGLLM_CONFIG.baseUrl}/api/v1/workspace/${workspaceSlug}/chat`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${ANYTHINGLLM_CONFIG.apiKey}`
+                            },
+                            body: JSON.stringify({
+                                message: `@agent search Google for information about this LinkedIn profile: ${linkedinUrl}
+
+Search terms: "${linkedinUsername}" linkedin, "${linkedinUsername}" professional profile, "${linkedinUsername}" company
+
+Find publicly available information about this person from company websites, press releases, professional directories, and news articles.
+
+/exit
+
+Based on the search results, provide:
+1. Full name
+2. Current job title and company  
+3. Location/City
+4. Professional background and experience summary
+5. Key skills and expertise areas
+6. Education background
+7. Professional achievements or notable activities
+8. Industry focus and specializations
+9. Company information if available`,
+                                mode: "chat"
+                            })
+                        });
+
+                        if (!linkedinResponse.ok) {
+                            throw new Error(`Web search failed: ${linkedinResponse.status}`);
+                        }
+                        
+                        const linkedinResult = await linkedinResponse.json();
+                          // Extract the response text from the agent
+                        const agentResponse = linkedinResult.textResponse || linkedinResult.response || '';
+                        console.log('LinkedIn Agent Response:', agentResponse);
+
+                        // Helper function to parse LinkedIn agent response
+                        function parseLinkedInResponse(responseText) {
+                            const data = {};
+                            const lines = responseText.split('\n').filter(line => line.trim() !== '');
+
+                            lines.forEach(line => {
+                                // Handle both old and new formats
+                                if (line.includes('**Full Name**') || line.startsWith('**1. Full Name:**')) {
+                                    data.name = line.replace(/\*\*.*?Full Name.*?\*\*:?\s*/i, '').trim();
+                                } else if (line.includes('**Current Job Title and Company**') || line.startsWith('**2. Current Job Title and Company:**')) {
+                                    data.headline = line.replace(/\*\*.*?Current Job Title and Company.*?\*\*:?\s*/i, '').trim();
+                                } else if (line.includes('**Location**') || line.startsWith('**3. Location/City:**')) {
+                                    data.location = line.replace(/\*\*.*?Location.*?\*\*:?\s*/i, '').trim();
+                                } else if (line.includes('**Professional Background**') || line.startsWith('**4. Professional Background and Experience Summary:**')) {
+                                    data.experience = line.replace(/\*\*.*?Professional Background.*?\*\*:?\s*/i, '').trim();
+                                } else if (line.includes('**Key Skills**') || line.startsWith('**5. Key Skills and Expertise Areas:**')) {
+                                    data.skills = line.replace(/\*\*.*?Key Skills.*?\*\*:?\s*/i, '').trim();
+                                } else if (line.includes('**Education**') || line.startsWith('**6. Education Background:**')) {
+                                    data.education = line.replace(/\*\*.*?Education.*?\*\*:?\s*/i, '').trim();
+                                } else if (line.includes('**Professional Achievements**') || line.startsWith('**7. Professional Achievements or Notable Activities:**')) {
+                                    data.insights = line.replace(/\*\*.*?Professional Achievements.*?\*\*:?\s*/i, '').trim();
+                                } else if (line.includes('**Industry Focus**')) {
+                                    data.industry = line.replace(/\*\*.*?Industry Focus.*?\*\*:?\s*/i, '').trim();
+                                }
+                            });
+
+                            // Special handling for multi-line content
+                            const text = responseText;
+                            
+                            // Extract name
+                            if (!data.name) {
+                                const nameMatch = text.match(/1\.\s*\*\*Full Name\*\*:?\s*(.+)/i);
+                                if (nameMatch) data.name = nameMatch[1].trim();
+                            }
+                            
+                            // Extract job title and company
+                            if (!data.headline) {
+                                const jobMatch = text.match(/2\.\s*\*\*Current Job Title and Company\*\*:?\s*(.+)/i);
+                                if (jobMatch) data.headline = jobMatch[1].trim();
+                            }
+                            
+                            // Extract location
+                            if (!data.location) {
+                                const locationMatch = text.match(/3\.\s*\*\*Location\/City\*\*:?\s*(.+)/i);
+                                if (locationMatch) data.location = locationMatch[1].trim();
+                            }
+                            
+                            // Extract experience
+                            if (!data.experience) {
+                                const expMatch = text.match(/4\.\s*\*\*Professional Background.*?\*\*:?\s*(.+?)(?=\n\d\.|\n\*\*|$)/is);
+                                if (expMatch) data.experience = expMatch[1].trim();
+                            }
+                            
+                            // Extract skills
+                            if (!data.skills) {
+                                const skillsMatch = text.match(/5\.\s*\*\*Key Skills.*?\*\*:?\s*(.+?)(?=\n\d\.|\n\*\*|$)/is);
+                                if (skillsMatch) data.skills = skillsMatch[1].trim();
+                            }
+                            
+                            return data;
+                        }
+                        
+                          // Try to extract JSON from the agent response
+                        let extractedProfileData = {};
+                        try {
+                            // Look for JSON in the response
+                            const jsonMatch = agentResponse.match(/\{[\s\S]*\}/);
+                            if (jsonMatch) {
+                                extractedProfileData = JSON.parse(jsonMatch[0]);
+                            } else {
+                                // Fallback: parse the response manually
+                                extractedProfileData = parseLinkedInResponse(agentResponse);
+                            }
+                        } catch (parseError) {
+                            console.log('Could not parse agent response as JSON, using fallback parsing');
+                            try {
+                                extractedProfileData = parseLinkedInResponse(agentResponse);
+                            } catch (fallbackError) {
+                                console.error('Fallback parsing also failed:', fallbackError);
+                                throw new Error('Failed to parse profile information');
+                            }
+                        }
+                        
+                        // Update the profile tab with real data
+                        document.getElementById('profile-loading').classList.add('hidden');
+                        document.getElementById('profile-content').classList.remove('hidden');
+                        
+                        // Switch to the profile tab
+                        document.querySelectorAll('.client-tab-btn').forEach(btn => {
+                            btn.classList.remove('active', 'border-b-2', 'border-blue-500');
+                            btn.classList.add('text-gray-500');
+                        });
+                        document.getElementById('tab-profile-analysis').classList.add('active', 'border-b-2', 'border-blue-500');
+                        document.getElementById('tab-profile-analysis').classList.remove('text-gray-500');
+                        
+                        document.querySelectorAll('.client-tab-content').forEach(content => {
+                            content.classList.add('hidden');
+                        });
+                        document.getElementById('profile-analysis-content').classList.remove('hidden');
+                        
+                        // Fill in the profile data
+                        document.getElementById('profile-name').textContent = extractedProfileData.name || "Name not found";
+                        document.getElementById('profile-headline').textContent = extractedProfileData.headline || "Position not found";
+                        document.getElementById('profile-location').textContent = extractedProfileData.location || "Location not found";
+                        document.getElementById('profile-connections').textContent = extractedProfileData.connections || "Connections not found";
+                        document.getElementById('profile-experience').innerHTML = extractedProfileData.experience || "Experience not found";
+                        document.getElementById('profile-skills').innerHTML = extractedProfileData.skills || "Skills not found";
+                        document.getElementById('profile-education').innerHTML = extractedProfileData.education || "Education not found";
+                        document.getElementById('profile-insights').innerHTML = extractedProfileData.insights || "Insights not available";
+                        
+                        // Update form fields with the extracted data
+                        document.getElementById('client-name').value = extractedProfileData.name || "";
+                        document.getElementById('client-email').value = extractedProfileData.email || "";
+                        document.getElementById('client-phone').value = extractedProfileData.phone || "";
+                        document.getElementById('client-location').value = extractedProfileData.location || "";
+                        
+                        statusEl.innerHTML = '<span class="text-green-500">✅ Profile information gathered via web search</span>';
+                        
+                    } catch (error) {
+                        console.error("LinkedIn web search error:", error);
+                        statusEl.innerHTML = `<span class="text-yellow-500">⚠️ Web search encountered an issue: ${error.message}</span>`;
+                          // Fallback to error message - NO DEMO DATA
+
+                    }
+                }
+                
+                // Process Website URL if provided
                 let companyData = null;
                 if (websiteUrl) {
                     // Helper function to parse Company agent response
@@ -2162,34 +2340,22 @@
                         const lines = responseText.split('\n').filter(line => line.trim() !== '');
 
                         lines.forEach(line => {
-                            if (line.startsWith('**Company Name:**') || line.startsWith('**Name:**')) {
-                                data.name = line.replace(/\*\*(Company Name|Name):\*\*/, '').trim();
+                            if (line.startsWith('**Company Name:**')) {
+                                data.name = line.replace('**Company Name:**', '').trim();
                             } else if (line.startsWith('**Industry:**')) {
                                 data.industry = line.replace('**Industry:**', '').trim();
-                            } else if (line.startsWith('**Size:**') || line.startsWith('**Company Size:**')) {
-                                data.size = line.replace(/\*\*(Size|Company Size):\*\*/, '').trim();
-                            } else if (line.startsWith('**Founded:**') || line.startsWith('**Founded Year:**')) {
-                                data.founded = line.replace(/\*\*(Founded|Founded Year):\*\*/, '').trim();
-                            } else if (line.startsWith('**Location:**')) {
-                                data.location = line.replace('**Location:**', '').trim();
-                            } else if (line.startsWith('**Overview:**') || line.startsWith('**Business Model:**')) {
-                                data.overview = line.replace(/\*\*(Overview|Business Model):\*\*/, '').trim();
-                            } else if (line.startsWith('**Market Position:**') || line.startsWith('**Market:**')) {
-                                data.market = line.replace(/\*\*(Market Position|Market):\*\*/, '').trim();
-                            } else if (line.startsWith('**Digital Presence:**')) {
-                                data.digitalPresence = line.replace('**Digital Presence:**', '').trim();
-                            } else if (line.startsWith('**Growth Indicators:**')) {
-                                data.growth = line.replace('**Growth Indicators:**', '').trim();
-                            } else if (line.startsWith('**Challenges:**') || line.startsWith('**Business Challenges:**')) {
-                                data.challenges = line.replace(/\*\*(Challenges|Business Challenges):\*\*/, '').trim();
+                            } else if (line.startsWith('**Size:**')) {
+                                data.size = line.replace('**Size:**', '').trim();
+                            } else if (line.startsWith('**Founded:**')) {
+                                data.founded = line.replace('**Founded:**', '').trim();
+                            } else if (line.startsWith('**Overview:**')) {
+                                data.overview = line.replace('**Overview:**', '').trim();
+                            } else if (line.startsWith('**Market:**')) {
+                                data.market = line.replace('**Market:**', '').trim();
+                            } else if (line.startsWith('**Challenges:**')) {
+                                data.challenges = line.replace('**Challenges:**', '').trim();
                             } else if (line.startsWith('**Opportunities:**')) {
                                 data.opportunities = line.replace('**Opportunities:**', '').trim();
-                            } else if (line.startsWith('**Technology Stack:**')) {
-                                data.technology = line.replace('**Technology Stack:**', '').trim();
-                            } else if (line.startsWith('**Value Proposition:**')) {
-                                data.valueProposition = line.replace('**Value Proposition:**', '').trim();
-                            } else if (line.startsWith('**Target Customers:**')) {
-                                data.targetCustomers = line.replace('**Target Customers:**', '').trim();
                             }
                         });
                         return data;
@@ -2206,20 +2372,11 @@
                             body: JSON.stringify({
                                 message: `@agent search Google and analyze the website ${websiteUrl}
 
-Conduct a comprehensive business intelligence analysis. Extract detailed information including:
-
-BASIC INFO: Company name, industry, size, founded year, location
-BUSINESS MODEL: Revenue streams, target customers, pricing strategy, value proposition
-MARKET POSITION: Market share, key competitors, competitive advantages, differentiation
-DIGITAL PRESENCE: Website quality, social media presence, online marketing approach
-GROWTH INDICATORS: Recent news, funding, expansions, team growth, product launches
-BUSINESS CHALLENGES: Current market challenges, operational issues, growth barriers
-OPPORTUNITIES: Market opportunities, expansion potential, service gaps, emerging trends
-TECHNOLOGY STACK: Key technologies used, digital infrastructure, automation level
+Find information about this company from their website and other publicly available sources.
 
 /exit
 
-Format as detailed JSON with specific, actionable insights relevant for marketing service recommendations.`,
+Extract the following company information in JSON format: name, industry, size, founded, overview, market, challenges, and opportunities. Please format as valid JSON.`,
                                 mode: "chat"
                             })
                         });
@@ -2236,52 +2393,14 @@ Format as detailed JSON with specific, actionable insights relevant for marketin
                         // Try to extract JSON from the agent response
                         let extractedCompanyData = {};
                         try {
-                            // Look for JSON in the response (handle nested JSON structure)
-                            const jsonMatch = agentResponse.match(/```json\s*(\{[\s\S]*?\})\s*```/);
+                            // Look for JSON in the response
+                            const jsonMatch = agentResponse.match(/\{[\s\S]*\}/);
                             if (jsonMatch) {
-                                const jsonData = JSON.parse(jsonMatch[1]);
-                                // Transform nested structure to flat structure
-                                extractedCompanyData = {
-                                    name: jsonData.CompanyName || jsonData.name,
-                                    industry: jsonData.Industry || jsonData.industry,
-                                    size: jsonData.Size || jsonData.size,
-                                    founded: jsonData.FoundedYear || jsonData.founded,
-                                    location: jsonData.Location || jsonData.location,
-                                    overview: jsonData.BusinessModel ? 
-                                        `Revenue: ${jsonData.BusinessModel.RevenueStreams?.join(', ') || 'N/A'}. Pricing: ${jsonData.BusinessModel.PricingStrategy || 'N/A'}. Value: ${jsonData.BusinessModel.ValueProposition || 'N/A'}` 
-                                        : jsonData.overview,
-                                    market: jsonData.MarketPosition ? 
-                                        `Market share: ${jsonData.MarketPosition.MarketShare || 'N/A'}. Competitors: ${jsonData.MarketPosition.KeyCompetitors?.join(', ') || 'N/A'}. Advantages: ${jsonData.MarketPosition.CompetitiveAdvantages?.join(', ') || 'N/A'}` 
-                                        : jsonData.market,
-                                    targetCustomers: jsonData.BusinessModel?.TargetCustomers?.join(', ') || jsonData.targetCustomers || 'Not specified',
-                                    valueProposition: jsonData.BusinessModel?.ValueProposition || jsonData.valueProposition || 'Not specified',
-                                    digitalPresence: jsonData.DigitalPresence ? 
-                                        `Website: ${jsonData.DigitalPresence.WebsiteQuality || 'N/A'}. Marketing: ${jsonData.DigitalPresence.OnlineMarketingApproach || 'N/A'}` 
-                                        : jsonData.digitalPresence || 'Not analyzed',
-                                    growth: jsonData.GrowthIndicators ? 
-                                        `Recent: ${jsonData.GrowthIndicators.RecentNews?.join(', ') || 'N/A'}. Funding: ${jsonData.GrowthIndicators.Funding || 'N/A'}. Expansion: ${jsonData.GrowthIndicators.Expansions || 'N/A'}` 
-                                        : jsonData.growth || 'Not analyzed',
-                                    technology: jsonData.TechnologyStack ? 
-                                        `Technologies: ${jsonData.TechnologyStack.KeyTechnologiesUsed?.join(', ') || 'N/A'}. Infrastructure: ${jsonData.TechnologyStack.DigitalInfrastructure || 'N/A'}` 
-                                        : jsonData.technology || 'Not analyzed',
-                                    challenges: Array.isArray(jsonData.BusinessChallenges) ? 
-                                        jsonData.BusinessChallenges.join(', ') 
-                                        : jsonData.challenges || 'Not identified',
-                                    opportunities: Array.isArray(jsonData.Opportunities) ? 
-                                        jsonData.Opportunities.join(', ') 
-                                        : jsonData.opportunities || 'Not identified'
-                                };
+                                extractedCompanyData = JSON.parse(jsonMatch[0]);
                             } else {
-                                // Try basic JSON match
-                                const basicJsonMatch = agentResponse.match(/\{[\s\S]*\}/);
-                                if (basicJsonMatch) {
-                                    extractedCompanyData = JSON.parse(basicJsonMatch[0]);
-                                } else {
-                                    // Fallback: parse the response manually
-                                    extractedCompanyData = parseCompanyResponse(agentResponse);
-                                }
-                            }
-                        } catch (parseError) {
+                                // Fallback: parse the response manually
+                                extractedCompanyData = parseCompanyResponse(agentResponse);
+                            }                        } catch (parseError) {
                             console.log('Could not parse agent response as JSON, using fallback parsing');
                             try {
                                 extractedCompanyData = parseCompanyResponse(agentResponse);
@@ -2295,177 +2414,34 @@ Format as detailed JSON with specific, actionable insights relevant for marketin
                         document.getElementById('company-loading').classList.add('hidden');
                         document.getElementById('company-content').classList.remove('hidden');
                         
-                        // After analysis is complete, switch to AI Services tab to show results
+                        // Switch to the company tab
                         setTimeout(() => {
                             document.querySelectorAll('.client-tab-btn').forEach(btn => {
                                 btn.classList.remove('active', 'border-b-2', 'border-blue-500');
                                 btn.classList.add('text-gray-500');
                             });
-                            document.getElementById('tab-service-recommendations').classList.add('active', 'border-b-2', 'border-blue-500');
-                            document.getElementById('tab-service-recommendations').classList.remove('text-gray-500');
+                            document.getElementById('tab-company-analysis').classList.add('active', 'border-b-2', 'border-blue-500');
+                            document.getElementById('tab-company-analysis').classList.remove('text-gray-500');
                             
                             document.querySelectorAll('.client-tab-content').forEach(content => {
                                 content.classList.add('hidden');
                             });
-                            document.getElementById('service-recommendations-content').classList.remove('hidden');
-                        }, 3000);
+                            document.getElementById('company-analysis-content').classList.remove('hidden');
+                        }, 2000);
                           // Extract and fill in the company data
                         document.getElementById('company-name').textContent = extractedCompanyData.name || "Company name not found";
                         document.getElementById('company-industry').textContent = extractedCompanyData.industry || "Industry not found";
                         document.getElementById('company-size').textContent = extractedCompanyData.size || "Company size not found";
                         document.getElementById('company-founded').textContent = extractedCompanyData.founded || "Founded date not found";
-                        document.getElementById('company-location').textContent = extractedCompanyData.location || "Location not found";
-                        document.getElementById('company-overview').innerHTML = extractedCompanyData.overview || "Business model analysis not available";
-                        document.getElementById('company-market').innerHTML = extractedCompanyData.market || "Market position analysis not available";
-                        document.getElementById('company-challenges').innerHTML = extractedCompanyData.challenges || "Business challenges not identified";
-                        document.getElementById('company-opportunities').innerHTML = extractedCompanyData.opportunities || "Market opportunities not identified";
-                        
-                        // Populate new detailed fields
-                        document.getElementById('company-target-customers').innerHTML = extractedCompanyData.targetCustomers || "Target customer analysis not available";
-                        document.getElementById('company-value-proposition').innerHTML = extractedCompanyData.valueProposition || "Value proposition analysis not available";
-                        document.getElementById('company-digital-presence').innerHTML = extractedCompanyData.digitalPresence || "Digital presence analysis not available";
-                        document.getElementById('company-growth').innerHTML = extractedCompanyData.growth || "Growth indicators analysis not available";
-                        document.getElementById('company-technology').innerHTML = extractedCompanyData.technology || "Technology stack analysis not available";
+                        document.getElementById('company-overview').innerHTML = extractedCompanyData.overview || "Overview not available";
+                        document.getElementById('company-market').innerHTML = extractedCompanyData.market || "Market information not available";
+                        document.getElementById('company-challenges').innerHTML = extractedCompanyData.challenges || "Challenges not identified";
                         
                         // Update form fields with the extracted data
                         document.getElementById('client-company').value = extractedCompanyData.name || "";
                         document.getElementById('client-industry').value = extractedCompanyData.industry || "";
                         document.getElementById('client-size').value = extractedCompanyData.size || "";
-                        document.getElementById('client-description').value = extractedCompanyData.overview || "";
-                        
-                        // Generate service recommendations based on company analysis
-                        statusEl.innerHTML = '<span class="animate-pulse">⚡ Generating AI service recommendations...</span>';
-                        
-                        try {
-                            // Get the service catalog
-                            const serviceCatalog = DataManager.getServiceCatalog();
-                            
-                            // Create a summary of available services for the AI
-                            const servicesForAI = serviceCatalog.services.map(service => ({
-                                name: service.name,
-                                category: service.category,
-                                description: service.description,
-                                price: service.price
-                            }));
-                            
-                            // Generate service recommendations using AI
-                            const serviceRecommendationResponse = await fetch(`${ANYTHINGLLM_CONFIG.baseUrl}/api/v1/workspace/${workspaceSlug}/chat`, {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'Authorization': `Bearer ${ANYTHINGLLM_CONFIG.apiKey}`
-                                },
-                                body: JSON.stringify({
-                                    message: `Based on this company analysis, recommend the most suitable services:
-
-Company: ${extractedCompanyData.name || 'Unknown'}
-Industry: ${extractedCompanyData.industry || 'Unknown'}
-Size: ${extractedCompanyData.size || 'Unknown'}
-Overview: ${extractedCompanyData.overview || 'No overview available'}
-Challenges: ${extractedCompanyData.challenges || 'No challenges identified'}
-
-Available Services:
-${JSON.stringify(servicesForAI, null, 2)}
-
-Please recommend 3-5 most relevant services and explain why they match this company's needs. Format your response as:
-
-RECOMMENDATION_BASIS: [Brief explanation of why these services match]
-
-RECOMMENDED_SERVICES:
-1. Service Name: [Reason for recommendation]
-2. Service Name: [Reason for recommendation]
-...`,
-                                    mode: "chat"
-                                })
-                            });
-                            
-                            if (serviceRecommendationResponse.ok) {
-                                const serviceResult = await serviceRecommendationResponse.json();
-                                const serviceResponse = serviceResult.textResponse || serviceResult.response || '';
-                                
-                                // Parse the AI response for service recommendations
-                                const basisMatch = serviceResponse.match(/RECOMMENDATION_BASIS:\s*(.*?)(?=RECOMMENDED_SERVICES:|$)/s);
-                                const servicesMatch = serviceResponse.match(/RECOMMENDED_SERVICES:\s*(.*)/s);
-                                
-                                // Update the services tab
-                                document.getElementById('services-loading').classList.add('hidden');
-                                document.getElementById('services-content').classList.remove('hidden');
-                                
-                                // Fill in the recommendation basis
-                                const recommendationBasis = basisMatch ? basisMatch[1].trim() : 'Based on the company analysis, these services align with their business needs and challenges.';
-                                document.getElementById('recommendation-basis').textContent = recommendationBasis;
-                                document.getElementById('rec-client-name').textContent = extractedCompanyData.name || 'this client';
-                                
-                                // Parse and display recommended services
-                                let recommendedServicesHTML = '';
-                                if (servicesMatch) {
-                                    const servicesList = servicesMatch[1].split('\n').filter(line => line.trim().match(/^\d+\./));
-                                    
-                                    servicesList.forEach(serviceLine => {
-                                        const serviceMatch = serviceLine.match(/^\d+\.\s*([^:]+):\s*(.*)/);
-                                        if (serviceMatch) {
-                                            const serviceName = serviceMatch[1].trim();
-                                            const reason = serviceMatch[2].trim();
-                                            
-                                            // Find the service in catalog for pricing
-                                            const fullService = serviceCatalog.services.find(s => 
-                                                s.name.toLowerCase().includes(serviceName.toLowerCase()) || 
-                                                serviceName.toLowerCase().includes(s.name.toLowerCase())
-                                            );
-                                            
-                                            recommendedServicesHTML += `
-                                                <div class="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
-                                                    <div class="flex justify-between items-start mb-2">
-                                                        <h4 class="font-semibold text-gray-900">${serviceName}</h4>
-                                                        ${fullService ? `<span class="text-sm font-medium text-green-600">${fullService.price}</span>` : ''}
-                                                    </div>
-                                                    <p class="text-sm text-gray-600 mb-3">${reason}</p>
-                                                    ${fullService ? `<p class="text-xs text-gray-500">${fullService.description}</p>` : ''}
-                                                    <div class="mt-3 flex justify-between items-center">
-                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                                            Recommended
-                                                        </span>
-                                                        <button class="text-sm text-blue-600 hover:text-blue-800" onclick="addServiceToSOW('${serviceName}')">
-                                                            Add to SOW →
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            `;
-                                        }
-                                    });
-                                }
-                                
-                                if (!recommendedServicesHTML) {
-                                    recommendedServicesHTML = '<p class="text-gray-500 text-center py-4">No specific service recommendations generated.</p>';
-                                }
-                                
-                                document.getElementById('recommended-services').innerHTML = recommendedServicesHTML;
-                                
-                                statusEl.innerHTML = '<span class="text-green-500">✅ Analysis complete - all tabs populated</span>';
-                            } else {
-                                console.error('Service recommendation failed with status:', serviceRecommendationResponse.status);
-                                
-                                // Generate intelligent fallback recommendations based on company data
-                                const intelligentRecommendations = generateFallbackRecommendations(extractedCompanyData, serviceCatalog);
-                                
-                                // Still show the services tab but with intelligent fallback
-                                document.getElementById('services-loading').classList.add('hidden');
-                                document.getElementById('services-content').classList.remove('hidden');
-                                document.getElementById('recommendation-basis').textContent = `Based on ${extractedCompanyData.name || 'this company'}'s industry and profile, our intelligent matching system recommends:`;
-                                document.getElementById('rec-client-name').textContent = extractedCompanyData.name || 'this client';
-                                document.getElementById('recommended-services').innerHTML = intelligentRecommendations;
-                            }
-                        } catch (serviceError) {
-                            console.error('Service recommendation error:', serviceError);
-                            // Still show the services tab but with error message
-                            document.getElementById('services-loading').classList.add('hidden');
-                            document.getElementById('services-content').classList.remove('hidden');
-                            document.getElementById('recommendation-basis').textContent = 'Service recommendation system error.';
-                            document.getElementById('rec-client-name').textContent = extractedCompanyData.name || 'this client';
-                            document.getElementById('recommended-services').innerHTML = `<p class="text-red-500 text-center py-4">Service recommendation failed: ${serviceError.message}</p>`;
-                        }
-                        
-                        } catch (error) {
+                        document.getElementById('client-description').value = extractedCompanyData.overview || "";} catch (error) {
                         console.error("Website scraping error:", error);
                         statusEl.innerHTML = `<span class="text-yellow-500">⚠️ Website scraping encountered an issue: ${error.message}</span>`;
                           // NO DEMO DATA - Show error message
@@ -2478,6 +2454,7 @@ RECOMMENDED_SERVICES:
                   // Remove demo completion logic - no demo data anymore
                 setTimeout(() => {
                     statusEl.classList.add('hidden');
+                    processingAnimation.classList.add('hidden');
                 }, 2000);
                 
             } catch (error) {
@@ -2485,6 +2462,7 @@ RECOMMENDED_SERVICES:
                 statusEl.innerHTML = '<span class="text-red-500">✗ Failed to extract information</span>';
                 setTimeout(() => {
                     statusEl.classList.add('hidden');
+                    processingAnimation.classList.add('hidden');
                 }, 3000);
                 
                 showNotification('Failed to extract client information: ' + error.message, 'error');
@@ -2505,91 +2483,6 @@ RECOMMENDED_SERVICES:
             }
             
             typeWriter();
-        }
-
-        // Generate intelligent fallback recommendations when AI API fails
-        function generateFallbackRecommendations(companyData, serviceCatalog) {
-            const recommendations = [];
-            const services = serviceCatalog.services;
-            
-            // Industry-based recommendations
-            const industry = (companyData.industry || '').toLowerCase();
-            
-            if (industry.includes('business') || industry.includes('service')) {
-                recommendations.push({
-                    service: services.find(s => s.name.includes('SEO')),
-                    reason: 'Business services companies need strong online visibility to attract clients'
-                });
-                recommendations.push({
-                    service: services.find(s => s.name.includes('Content')),
-                    reason: 'Content marketing establishes expertise and builds trust with potential customers'
-                });
-            }
-            
-            if (industry.includes('tech') || industry.includes('software')) {
-                recommendations.push({
-                    service: services.find(s => s.name.includes('PPC')),
-                    reason: 'Technology companies benefit from targeted advertising to reach specific audiences'
-                });
-                recommendations.push({
-                    service: services.find(s => s.name.includes('Social')),
-                    reason: 'Tech companies need social media presence to build brand awareness'
-                });
-            }
-            
-            // Size-based recommendations
-            const size = (companyData.size || '').toLowerCase();
-            if (size.includes('small') || size.includes('startup')) {
-                recommendations.push({
-                    service: services.find(s => s.name.includes('Website')),
-                    reason: 'Small businesses need professional websites to establish credibility'
-                });
-            }
-            
-            // Default recommendations if no matches
-            if (recommendations.length === 0) {
-                recommendations.push(
-                    {
-                        service: services.find(s => s.name.includes('SEO')),
-                        reason: 'SEO is essential for any business to improve online visibility'
-                    },
-                    {
-                        service: services.find(s => s.name.includes('Content')),
-                        reason: 'Content marketing helps establish thought leadership and attract customers'
-                    },
-                    {
-                        service: services.find(s => s.name.includes('Social')),
-                        reason: 'Social media marketing is crucial for modern business engagement'
-                    }
-                );
-            }
-            
-            // Generate HTML for recommendations
-            let html = '';
-            recommendations.slice(0, 4).forEach(rec => {
-                if (rec.service) {
-                    html += `
-                        <div class="bg-white rounded-lg p-3 border border-gray-200 shadow-sm">
-                            <div class="flex justify-between items-start mb-2">
-                                <h4 class="font-medium text-gray-900 text-sm">${rec.service.name}</h4>
-                                <span class="text-xs font-medium text-green-600">${rec.service.price}</span>
-                            </div>
-                            <p class="text-xs text-gray-600 mb-2">${rec.reason}</p>
-                            <p class="text-xs text-gray-500 mb-2">${rec.service.description}</p>
-                            <div class="flex justify-between items-center">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                                    Smart Match
-                                </span>
-                                <button class="text-xs text-blue-600 hover:text-blue-800" onclick="addServiceToSOW('${rec.service.name}')">
-                                    Add to SOW →
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                }
-            });
-            
-            return html || '<p class="text-gray-500 text-center py-4 text-sm">Unable to generate recommendations.</p>';
         }
         
         function renderClientList(clientsToRender = clients) {
@@ -5099,12 +4992,6 @@ Project Phases:
                 }
             });
         });
-
-        // Helper function to add service to SOW (placeholder)
-        function addServiceToSOW(serviceName) {
-            showNotification(`Service "${serviceName}" will be added to SOW generation`, 'success');
-            // Future enhancement: integrate with SOW generation workflow
-        }
 
     </script>
 </body>

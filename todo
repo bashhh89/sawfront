@@ -1,0 +1,268 @@
+Okay, bro. I've analyzed the complete code for your application.
+
+First, let me be clear: this is **fantastic**. This is a real, full-featured web application, not just a simple demo. You have a mini-CRM for clients, a tabbed interface, and deep integration with your AnythingLLM backend already built. The foundation is incredibly strong.
+
+Now, let's get to the work. Our goal is to upgrade the **"SOW Generator" tab** and its JavaScript to handle the powerful, multi-phase SOWs our "Architect" AI now creates, and most importantly, make that output **editable for Sam**.
+
+Here is the exact, step-by-step blueprint to modify your code.
+
+---
+
+### **Action 1: Upgrade Your JavaScript Data Model**
+
+The first and most important step is to update your JavaScript `UnifiedSOW` class to match the detailed structure of the AI's output. The current class is too simple.
+
+**Find this class in your code:**
+`class UnifiedSOW { ... }`
+
+**Replace it entirely with this new, upgraded version:**
+
+```javascript
+// NEW, UPGRADED SOW DATA MODEL
+class UnifiedSOW {
+    constructor(data = {}) {
+        this.id = data.id || `sow_${Date.now()}`;
+        this.clientId = data.clientId || null;
+        this.title = data.title || 'Untitled Scope of Work';
+        this.status = data.status || 'draft';
+
+        // Core SOW Content Sections
+        this.overview = data.overview || '';
+        this.projectOutcomes = data.projectOutcomes || []; // Array of strings
+        this.scopeAssumptions = data.scopeAssumptions || []; // Array of strings
+        
+        // This is the most important change: An array to hold phase objects
+        this.phases = data.phases || []; 
+        /*
+        Example of a phase object that will go in this array:
+        { 
+          title: 'Phase 1: Discovery & Design', 
+          deliverables: ['Deliverable 1 text', 'Deliverable 2 text'],
+          pricingTable: [
+            { role: 'Tech - Sr. Consultant', hours: 10, rate: 295, cost: 2950 },
+            { role: 'Account Manager', hours: 4, rate: 180, cost: 720 }
+          ],
+          phaseTotal: 3670
+        }
+        */
+
+        // Financial Summary
+        this.subTotal = data.subTotal || 0;
+        this.budgetNotes = data.budgetNotes || '';
+        this.finalSummary = data.finalSummary || {
+            discountAmount: 0,
+            totalAfterDiscount: 0,
+            gstAmount: 0,
+            grandTotal: 0
+        };
+
+        // Metadata
+        this.createdAt = data.createdAt || new Date().toISOString();
+        this.updatedAt = data.updatedAt || new Date().toISOString();
+    }
+}
+```
+
+---
+
+### **Action 2: Re-Wire the `generateSOW` Function**
+
+Your current `generateSOW` function is a placeholder. We need to implement the full logic. This function will now be the controller for the entire process.
+
+**Find this function in your code:**
+`async function generateSOW() { ... }`
+
+**Replace it with this new logic:**
+
+```javascript
+// NEW, RE-WIRED SOW GENERATION LOGIC
+async function generateSOW() {
+    const brief = document.getElementById('sow-project-brief').value.trim();
+    if (!brief) {
+        showToast('Please provide the raw text brief first.', 'error');
+        return;
+    }
+
+    const sowPreview = document.getElementById('sow-preview');
+    sowPreview.innerHTML = `<div class="text-center py-8"><div class="animate-spin h-12 w-12 border-b-2 border-blue-600 rounded-full mx-auto mb-4"></div><p>The Architect is thinking...</p></div>`;
+    
+    try {
+        // This uses your existing AnythingLLM API function
+        const markdownResponse = await callAnythingLLM(brief); 
+        
+        // This is a NEW function we will create to parse the AI's response
+        const sowObject = parseAIResponseToSOW(markdownResponse); 
+        
+        // This is a NEW function we will create to build the editable HTML
+        renderEditableSOW(sowObject); 
+
+        showToast('✅ SOW draft generated and ready for editing!', 'success');
+        document.getElementById('export-pdf').disabled = false;
+        document.getElementById('copy-sow').disabled = false;
+
+    } catch (error) {
+        sowPreview.innerHTML = `<div class="text-center py-8 text-red-600"><p>Error generating SOW: ${error.message}</p></div>`;
+        showToast('Error generating SOW. Please try again.', 'error');
+    }
+}
+```
+
+---
+
+### **Action 3: Create the AI Response Parser**
+
+This is a **new function**. Its job is to read the raw Markdown text from the AI and convert it into our new, structured `UnifiedSOW` JavaScript object. This is the crucial translation step.
+
+**Add this new function to your JavaScript:**
+
+```javascript
+// NEW - AI RESPONSE PARSER FUNCTION
+function parseAIResponseToSOW(markdown) {
+    const sow = new UnifiedSOW();
+
+    // Helper function to extract a section's content
+    const getSectionContent = (title) => {
+        const regex = new RegExp(`##?\\s*${title}\\s*\\n([\\s\\S]*?)(?=\\n##|$)`, 'i');
+        const match = markdown.match(regex);
+        return match ? match[1].trim() : '';
+    };
+
+    // Extract simple text sections
+    sow.title = markdown.match(/^#\s*(.*)/m)?.[1] || 'Scope of Work';
+    sow.overview = getSectionContent('Overview');
+    sow.projectOutcomes = getSectionContent('Project Outcomes').split('\n').map(s => s.replace(/[-*]\s*/, '').trim());
+    sow.scopeAssumptions = getSectionContent('Scope Assumptions').split('\n').map(s => s.replace(/[-*]\s*/, '').trim());
+    sow.budgetNotes = getSectionContent('Budget & Discount Notes');
+
+    // Extract phases with their details
+    const phasesRegex = /###\s*(Phase \d+.*)\n([\s\S]*?)####\s*Pricing Summary \/ Investment\n([\s\S]*?)(?=\n###|\n## Total Project Summary|$)/gi;
+    let match;
+    while ((match = phasesRegex.exec(markdown)) !== null) {
+        const phase = {};
+        phase.title = match[1].trim();
+        phase.deliverables = match[2].split('\n').map(s => s.replace(/[-*]\s*/, '').trim()).filter(s => s);
+        
+        const pricingTable = [];
+        const rows = match[3].trim().split('\n');
+        rows.forEach(row => {
+            const cells = row.split('|').map(cell => cell.trim());
+            if (cells.length === 5 && !cells[1].includes('ROLE')) { // check for table rows
+                pricingTable.push({
+                    role: cells[1],
+                    hours: parseFloat(cells[2]) || 0,
+                    rate: parseFloat(cells[3].replace(/[$,]/g, '')) || 0,
+                    cost: parseFloat(cells[4].replace(/[$,]/g, '')) || 0
+                });
+            }
+        });
+        phase.pricingTable = pricingTable;
+        phase.phaseTotal = pricingTable.reduce((sum, item) => sum + item.cost, 0);
+        sow.phases.push(phase);
+    }
+    
+    // You can add similar logic to parse the final summary tables if needed
+    // For now, we will recalculate these dynamically in the UI.
+
+    return sow;
+}
+```
+
+---
+
+### **Action 4: Create the SOW Editor Renderer**
+
+This is another **new function** that builds the interactive HTML based on the structured `sowObject`.
+
+**Add this new function to your JavaScript:**
+
+```javascript
+// NEW - SOW EDITOR RENDERER FUNCTION
+function renderEditableSOW(sow) {
+    const previewDiv = document.getElementById('sow-preview');
+    let html = '';
+
+    // Render static parts
+    html += `<h2 contenteditable="true">${sow.title}</h2>`;
+    html += `<h3>Overview</h3><div contenteditable="true" class="editable-textarea">${sow.overview}</div>`;
+    // ... render outcomes, assumptions etc. as editable lists ...
+
+    // Render each phase
+    sow.phases.forEach((phase, index) => {
+        html += `
+            <div class="phase-block" data-phase-index="${index}">
+                <h3 contenteditable="true">${phase.title}</h3>
+                <h4>Deliverables</h4>
+                <ul class="deliverables-list">${phase.deliverables.map(d => `<li contenteditable="true">${d}</li>`).join('')}</ul>
+                <h4>Pricing Summary / Investment</h4>
+                <table class="pricing-table">
+                    <thead><tr><th>Role</th><th>Hours</th><th>Rate (AUD)</th><th>Total</th></tr></thead>
+                    <tbody>
+                        ${phase.pricingTable.map((item, itemIndex) => `
+                            <tr data-item-index="${itemIndex}">
+                                <td contenteditable="true">${item.role}</td>
+                                <td><input type="number" class="hours-input" value="${item.hours}" oninput="recalculateTotals()"></td>
+                                <td><input type="number" class="rate-input" value="${item.rate}" oninput="recalculateTotals()"></td>
+                                <td class="line-total">$${item.cost.toFixed(2)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+                <div class="phase-total">Phase Total: <strong>$${phase.phaseTotal.toFixed(2)}</strong></div>
+            </div>
+        `;
+    });
+    
+    // Render final summary section (read-only, updated by JS)
+    html += `
+        <div id="final-summary">
+            <h3>Total Project Summary</h3>
+            <div id="summary-table"></div>
+            <h3>Budget & Discount Notes</h3>
+            <div id="budget-notes" contenteditable="true">${sow.budgetNotes}</div>
+            <h3>Scope & Price Overview</h3>
+            <div id="final-price-overview"></div>
+        </div>
+    `;
+    
+    previewDiv.innerHTML = html;
+    recalculateTotals(); // Initial calculation
+}
+```
+
+### **Action 5: Implement the Recalculation Logic**
+
+Finally, create the `recalculateTotals()` function. This is the heart of the editor.
+
+**Add this final new function to your JavaScript:**
+
+```javascript
+// NEW - REAL-TIME RECALCULATION FUNCTION
+function recalculateTotals() {
+    let subTotal = 0;
+    const phaseBlocks = document.querySelectorAll('.phase-block');
+
+    phaseBlocks.forEach(phaseBlock => {
+        let phaseTotal = 0;
+        const rows = phaseBlock.querySelectorAll('.pricing-table tbody tr');
+        rows.forEach(row => {
+            const hours = parseFloat(row.querySelector('.hours-input').value) || 0;
+            const rate = parseFloat(row.querySelector('.rate-input').value) || 0;
+            const lineTotal = hours * rate;
+            row.querySelector('.line-total').textContent = '$' + lineTotal.toFixed(2);
+            phaseTotal += lineTotal;
+        });
+        phaseBlock.querySelector('.phase-total strong').textContent = '$' + phaseTotal.toFixed(2);
+        subTotal += phaseTotal;
+    });
+
+    // For now, let's just update a simple total. 
+    // You can build out the full final summary table here.
+    const finalSummaryDiv = document.getElementById('final-price-overview');
+    if(finalSummaryDiv) {
+        finalSummaryDiv.innerHTML = `<div><strong>Project Sub-Total: $${subTotal.toFixed(2)}</strong></div>`;
+        // Add logic for discount and GST here...
+    }
+}
+```
+
+By adding these pieces, you will transform your already powerful tool into the fully interactive "SOW Workbench" that will give Sam the ultimate control over the final document.
